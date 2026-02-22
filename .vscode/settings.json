@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "castfile": "yaml",
+        "*.cast.yaml": "yaml"
+    },
+    "yaml.schemas": {
+        "./eng/schemas/castfile.schema.json" : "castfile",
+        "./eng/schemas/cast.mod.schema.json" : ".cast/modules/**.yaml"
+    }
+}

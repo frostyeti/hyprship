@@ -1,0 +1,7 @@
+workspace:
+  include: []
+
+tasks:
+  default:
+    use: "bash"
+    run: "echo 'Hello, World!'"

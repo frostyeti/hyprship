@@ -1,0 +1,18 @@
+[tools]
+bun = "latest"
+fzf = "latest"
+go = "latest"
+"go:github.com/frostyeti/cast" = "latest"
+"go:github.com/frostyeti/kpv" = "latest"
+jq = "latest"
+rg = "latest"
+yq = "latest"
+
+[env]
+_.path = [
+    "./bin",
+    "./node_modules/.bin",
+    "~/.local/bin",
+    "~/.cargo/bin",
+    "~/.bun/bin",
+]

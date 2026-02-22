@@ -1,0 +1,131 @@
+
+tasks:
+  echo:
+    use: shell
+    run: "echo 'Hello, World!'"
+  build:
+    use: shell
+    desc: Build the API binary.
+    help: |
+      cast build
+
+      Builds the API binary and places it in the `bin` directory.
+    run: |
+      echo "Building the API binary..."
+      go build -o bin/hyprship-api ./main.go
+      mkdir -p ../../bin
+      cp bin/hyprship-api ../../bin/hyprship-api
+      echo "Build complete. Binary is located at bin/hyprship-api and ../../bin/hyprship-api"
+
+  test:unit:
+    use: bash
+    desc: Run unit tests for the API.
+    help: |
+      cast test:unit
+
+      Runs the unit tests for the API. 
+      No tags are used for these tests, so they should be focused on
+      testing individual components in isolation. Make sure to set
+      up any necessary environment variables or dependencies before running this task.
+    run: go test -v ./...
+
+  test:integration:
+    use: bash
+    desc: Run integration tests for the API.
+    help: |
+      cast test:integration
+    
+      Runs the integration tests for the API. 
+      It uses the `integration` build tag to separate these
+      tests from unit tests. Make sure to set up any necessary
+      environment variables or dependencies before running this task.
+    run: go test -v -tags=integration ./...
+
+
+  test:e2e:
+    use: bash
+    desc: Run end-to-end tests for the API.
+    help: |
+      cast test:e2e
+    
+      Runs the end-to-end tests for the API. 
+      It uses the `e2e` build tag to separate these
+      tests from unit and integration tests. Make sure to set up any necessary
+      environment variables or dependencies before running this task.
+    run: go test -v -tags=e2e ./...
+
+  test:all:
+    use: bash
+    desc: Run all tests for the API.
+    help: |
+      cast test:all
+
+      Runs all tests for the API, including unit, integration, and end-to-end tests. 
+      It uses both `integration` and `e2e` build tags to ensure all tests are executed. 
+      Make sure to set up any necessary environment variables or dependencies before running this task.
+    run: go test -v -tags="integration e2e" ./...      
+
+  lint:
+    use: shell
+    desc: Lint the API codebase.
+    help: |
+      cast lint
+
+      Runs the linter on the API codebase to check for code quality and style issues. 
+      Make sure to have any necessary linters installed and configured before running this task.
+    run: golangci-lint run ./...
+
+  fmt:
+    use: shell
+    desc: Format the API codebase.
+    help: |
+      cast fmt
+
+      Formats the API codebase using gofmt. 
+      Make sure to have gofmt installed and configured before running this task.
+    run: go fmt ./...
+
+  clean:
+    use: shell
+    desc: Clean the API build artifacts.
+    help: |
+      cast clean
+
+      Cleans the build artifacts for the API by removing the `bin` directory. 
+      Make sure to have the necessary permissions to delete files in the `bin` directory before running this task.
+    run: rm -rf bin && rm -f ../../bin/hyprship-
+    
+  install:
+    use: shell
+    desc: Install the API binary.
+    help: |
+      cast install
+
+      Installs the API binary by copying it to the `bin` directory. 
+      Make sure to have the necessary permissions to copy files to the `bin` directory before running this task.
+    run: |
+      go mod download
+      go mod tidy
+
+  tidy:
+    use: shell
+    desc: Tidy the Go module dependencies.
+    help: |
+      cast tidy
+
+      Tidies the Go module dependencies by running `go mod tidy`. 
+      This will add any missing dependencies and remove any unused dependencies from the `go.mod` file. 
+      Make sure to have Go installed and configured before running this task.
+    run: go mod tidy
+
+  audit:
+    use: shell
+    desc: Audit the Go module dependencies for vulnerabilities.
+    help: |
+      cast audit
+
+      Audits the Go module dependencies for known vulnerabilities using `govulncheck`. 
+      Make sure to have Go installed and configured before running this task.
+    run: govulncheck ./...
+
+  
