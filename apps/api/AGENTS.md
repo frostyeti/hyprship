@@ -157,11 +157,31 @@ Use golang and gin for the API.  UPDATE the list of modules as needed
 - github.com/frostyeti/go/env
 - go.yaml.in/yaml/v4
 - github.com/spf13/viper
-- github.com/rs/zerolog
+- log/slog
+- github.com/samber/slog-gin
+- github.com/lmittmann/tint
 - github.com/open-telemetry/opentelemetry-go
 - github.com/gin-gonic/gin
 - net/http/httptest
 - golang.org/x/time/rate
+
+### Logging (slog)
+
+- Always use the structured logging package `log/slog`.
+- Avoid high-allocation debug or info logging statements when not needed. **Always** check if the level is enabled before logging high cost statements:
+  ```go
+  if logger.Enabled(ctx, slog.LevelDebug) {
+      slog.Debug("costly debug message", "data", getCostlyData())
+  }
+  ```
+- Use `slog.Group` to structure related log attributes.
+
+### OpenTelemetry (Telemetry)
+
+- Only trace and measure when OpenTelemetry is enabled (`cfg.Otel.Enabled == true`).
+- Ensure tracing or metrics spans are only initialized if an exporter that supports it is configured. (e.g. `prometheus` does not support tracing for Go Otel).
+- Add OpenTelemetry collectors/instrumentation for databases and datastores as they are implemented.
+- Follow the OpenTelemetry Semantic Conventions (see [semconv](https://opentelemetry.io/docs/concepts/semantic-conventions/)).
 
 ## Project Structure
 
