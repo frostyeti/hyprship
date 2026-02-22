@@ -82,6 +82,11 @@ Use the name `stores` for repositories and store for `respository`.  e.g. `UserS
 
 Use the golang-interfaces skill for designing interfaces for repositories.
 
+### Configuration
+
+**Always** update `apps/api/docs/configuration.md` when adding, changing, or removing configuration settings in `apps/api/config/config.go`.
+Use the prefix `HYPRSHIP` for all environment variables with `viper`.
+
 ### API Design
 
 **Always** use the skill `rest-api-design` when working on REST APIS, including planning
