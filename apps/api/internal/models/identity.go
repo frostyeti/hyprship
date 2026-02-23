@@ -1,0 +1,67 @@
+package models
+
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type User struct {
+	ID                 uuid.UUID  `json:"id"`
+	PrimaryEmail       *string    `json:"primaryEmail,omitempty"`
+	PrimaryEmailUpcase *string    `json:"-"`
+	PrimaryPhone       *string    `json:"primaryPhone,omitempty"`
+	Name               *string    `json:"name,omitempty"`
+	NameUpcase         *string    `json:"-"`
+	ImageURI           *string    `json:"imageUri,omitempty"`
+	IsBanned           bool       `json:"isBanned"`
+	CreatedAt          time.Time  `json:"createdAt"`
+	UpdatedAt          *time.Time `json:"updatedAt,omitempty"`
+}
+
+type Role struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	NameUpcase  string    `json:"-"`
+	Description string    `json:"description"`
+}
+
+type UserClaim struct {
+	ID     int32     `json:"id"`
+	UserID uuid.UUID `json:"userId"`
+	Type   string    `json:"type"`
+	Value  string    `json:"value"`
+}
+
+type RoleClaim struct {
+	ID     int32     `json:"id"`
+	RoleID uuid.UUID `json:"roleId"`
+	Type   string    `json:"type"`
+	Value  string    `json:"value"`
+}
+
+type UserAPIKey struct {
+	ID         int32      `json:"id"`
+	UserID     uuid.UUID  `json:"userId"`
+	Name       string     `json:"name"`
+	NameUpcase string     `json:"-"`
+	KeyHint    string     `json:"keyHint"`
+	KeyDigest  string     `json:"-"`
+	ExpiresAt  *time.Time `json:"expiresAt,omitempty"`
+	IsLocked   bool       `json:"isLocked"`
+	IsRevoked  bool       `json:"isRevoked"`
+	Comment    *string    `json:"comment,omitempty"`
+	CreatedAt  time.Time  `json:"createdAt"`
+	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
+}
+
+type UserSession struct {
+	ID        uuid.UUID  `json:"id"`
+	UserID    uuid.UUID  `json:"userId"`
+	ExpiresAt time.Time  `json:"expiresAt"`
+	Token     string     `json:"-"`
+	IPAddress *string    `json:"ipAddress,omitempty"`
+	UserAgent *string    `json:"userAgent,omitempty"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
