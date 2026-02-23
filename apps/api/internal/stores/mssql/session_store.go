@@ -25,7 +25,7 @@ func (s *UserSessionStore) Get(ctx context.Context, sessionID uuid.UUID) (*model
 	var updatedAt sql.NullTime
 	var idStr, userIDStr string
 	query := `SELECT CAST(id AS CHAR(36)), CAST(user_id AS CHAR(36)), expires_at, token, ip_address, user_agent, created_at, updated_at FROM user_sessions WHERE id = ?`
-	
+
 	err := s.db.QueryRowContext(ctx, core.Rebind("mssql", query), sessionID.String()).Scan(
 		&idStr, &userIDStr, &session.ExpiresAt, &session.Token,
 		&ipAddress, &userAgent, &session.CreatedAt, &updatedAt,
@@ -35,7 +35,7 @@ func (s *UserSessionStore) Get(ctx context.Context, sessionID uuid.UUID) (*model
 	} else if err != nil {
 		return nil, err
 	}
-	
+
 	session.ID, _ = uuid.Parse(idStr)
 	session.UserID, _ = uuid.Parse(userIDStr)
 	session.IPAddress = ipAddress
@@ -52,7 +52,7 @@ func (s *UserSessionStore) GetByToken(ctx context.Context, token string) (*model
 	var updatedAt sql.NullTime
 	var idStr, userIDStr string
 	query := `SELECT CAST(id AS CHAR(36)), CAST(user_id AS CHAR(36)), expires_at, token, ip_address, user_agent, created_at, updated_at FROM user_sessions WHERE token = ?`
-	
+
 	err := s.db.QueryRowContext(ctx, core.Rebind("mssql", query), token).Scan(
 		&idStr, &userIDStr, &session.ExpiresAt, &session.Token,
 		&ipAddress, &userAgent, &session.CreatedAt, &updatedAt,
@@ -62,7 +62,7 @@ func (s *UserSessionStore) GetByToken(ctx context.Context, token string) (*model
 	} else if err != nil {
 		return nil, err
 	}
-	
+
 	session.ID, _ = uuid.Parse(idStr)
 	session.UserID, _ = uuid.Parse(userIDStr)
 	session.IPAddress = ipAddress
