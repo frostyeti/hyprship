@@ -23,7 +23,7 @@ func (s *UserSessionStore) Get(ctx context.Context, sessionID uuid.UUID) (*model
 	var ipAddress, userAgent *string
 	var updatedAt sql.NullInt64
 	query := `SELECT id, user_id, expires_at, token, ip_address, user_agent, created_at, updated_at FROM user_sessions WHERE id = ?`
-	
+
 	err := s.db.QueryRowContext(ctx, query, sessionID).Scan(
 		&session.ID, &session.UserID, &session.ExpiresAt, &session.Token,
 		&ipAddress, &userAgent, &session.CreatedAt, &updatedAt,
@@ -33,7 +33,7 @@ func (s *UserSessionStore) Get(ctx context.Context, sessionID uuid.UUID) (*model
 	} else if err != nil {
 		return nil, err
 	}
-	
+
 	session.IPAddress = ipAddress
 	session.UserAgent = userAgent
 	if updatedAt.Valid {
@@ -48,7 +48,7 @@ func (s *UserSessionStore) GetByToken(ctx context.Context, token string) (*model
 	var ipAddress, userAgent *string
 	var updatedAt sql.NullInt64
 	query := `SELECT id, user_id, expires_at, token, ip_address, user_agent, created_at, updated_at FROM user_sessions WHERE token = ?`
-	
+
 	err := s.db.QueryRowContext(ctx, query, token).Scan(
 		&session.ID, &session.UserID, &session.ExpiresAt, &session.Token,
 		&ipAddress, &userAgent, &session.CreatedAt, &updatedAt,
@@ -58,7 +58,7 @@ func (s *UserSessionStore) GetByToken(ctx context.Context, token string) (*model
 	} else if err != nil {
 		return nil, err
 	}
-	
+
 	session.IPAddress = ipAddress
 	session.UserAgent = userAgent
 	if updatedAt.Valid {
@@ -97,7 +97,7 @@ func (s *UserSessionStore) ListByUser(ctx context.Context, userID uuid.UUID) ([]
 
 func (s *UserSessionStore) Create(ctx context.Context, session *models.UserSession) error {
 	query := `INSERT INTO user_sessions (id, user_id, expires_at, token, ip_address, user_agent, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
-	
+
 	var updatedAt *int64
 	if session.UpdatedAt != nil {
 		t := session.UpdatedAt.Unix()

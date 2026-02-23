@@ -34,7 +34,7 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 		Page:     1,
 		PageSize: 50,
 	}
-	
+
 	result, err := h.store.List(c.Request.Context(), opts)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{

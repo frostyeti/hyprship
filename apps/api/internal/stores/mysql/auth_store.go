@@ -49,7 +49,7 @@ func (s *UserPasswordAuthStore) Get(ctx context.Context, userID uuid.UUID) (*mod
 
 func (s *UserPasswordAuthStore) Create(ctx context.Context, a *models.UserPasswordAuth) error {
 	query := `INSERT INTO user_password_auth (user_id, password_digest, password_expires_at, last_attempted_at, attempt_count, otp_digest, otp_expires_at, otp_link_token, is_locked, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	
+
 	_, err := s.db.ExecContext(ctx, query, a.UserID, a.PasswordDigest, a.PasswordExpiresAt, a.LastAttemptedAt, a.AttemptCount, a.OtpDigest, a.OtpExpiresAt, a.OtpLinkToken, a.IsLocked, a.CreatedAt, a.UpdatedAt)
 	return err
 }

@@ -23,7 +23,7 @@ func (s *UserSessionStore) Get(ctx context.Context, sessionID uuid.UUID) (*model
 	var ipAddress, userAgent *string
 	var updatedAt sql.NullTime
 	query := `SELECT id, user_id, expires_at, token, ip_address, user_agent, created_at, updated_at FROM user_sessions WHERE id = $1`
-	
+
 	err := s.db.QueryRowContext(ctx, query, sessionID).Scan(
 		&session.ID, &session.UserID, &session.ExpiresAt, &session.Token,
 		&ipAddress, &userAgent, &session.CreatedAt, &updatedAt,
@@ -33,7 +33,7 @@ func (s *UserSessionStore) Get(ctx context.Context, sessionID uuid.UUID) (*model
 	} else if err != nil {
 		return nil, err
 	}
-	
+
 	session.IPAddress = ipAddress
 	session.UserAgent = userAgent
 	if updatedAt.Valid {
@@ -47,7 +47,7 @@ func (s *UserSessionStore) GetByToken(ctx context.Context, token string) (*model
 	var ipAddress, userAgent *string
 	var updatedAt sql.NullTime
 	query := `SELECT id, user_id, expires_at, token, ip_address, user_agent, created_at, updated_at FROM user_sessions WHERE token = $1`
-	
+
 	err := s.db.QueryRowContext(ctx, query, token).Scan(
 		&session.ID, &session.UserID, &session.ExpiresAt, &session.Token,
 		&ipAddress, &userAgent, &session.CreatedAt, &updatedAt,
@@ -57,7 +57,7 @@ func (s *UserSessionStore) GetByToken(ctx context.Context, token string) (*model
 	} else if err != nil {
 		return nil, err
 	}
-	
+
 	session.IPAddress = ipAddress
 	session.UserAgent = userAgent
 	if updatedAt.Valid {
