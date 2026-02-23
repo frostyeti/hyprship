@@ -10,12 +10,16 @@ and manage infra.
 - When a design such as a database table is missing field or can
   be greatly improved, suggest an updated design and prompt the user for input.
 - Run linters and formatters before completing the task and fix lint errors.
+- Run markdown lint and fix issues whenever markdown files are written.
 - Run tests before completing the task and fix tests.  
 - Format commits following the Conventional Commits specification.
   - Structure: `<type>[optional scope]: <description>`
   - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
   - Scopes: Indicate project component e.g. `feat(api)`, `fix(ui)`
   - Link GitHub issues in the description or footer (e.g. `#1`, `Resolves #1`, `Fixes #1`)
+- Use **Bun** or **Deno** for scripts instead of Python (as they are easier to install and Windows doesn't include Python).
+- Store all scripts in the `eng/scripts/` folder.
+- When creating binaries or executables, place them in `eng/bin/`. For cross-platform support, always write `<script>.cmd` and `<script>.ps1` wrappers for Windows.
   
 
 ## ⚠️ ASK FIRST
