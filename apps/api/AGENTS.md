@@ -183,6 +183,11 @@ Use golang and gin for the API.  UPDATE the list of modules as needed
 - Add OpenTelemetry collectors/instrumentation for databases and datastores as they are implemented.
 - Follow the OpenTelemetry Semantic Conventions (see [semconv](https://opentelemetry.io/docs/concepts/semantic-conventions/)).
 
+### Cryptography
+
+- **Hashing:** Use the PBKDF2 hasher in `apps/api/crypto` for internal application passwords, API keys, or any secrets that only need to be verified and never retrieved in plaintext. A good hint for the database schema is that any column ending with `_digest` should use the hasher.
+- **Encryption:** Use the AES-GCM encryption driver in `apps/api/crypto` for secrets that are stored for external apps and systems. These secrets must be encrypted at rest so they can be decrypted when sent to the service.
+
 ## Project Structure
 
 The is the directory structure for the apps/api project.
