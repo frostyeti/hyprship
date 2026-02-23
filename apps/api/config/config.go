@@ -11,9 +11,15 @@ type Config struct {
 	Log      *LogSettings    `mapstructure:"log"`
 	Otel     *OtelConfig     `mapstructure:"otel"`
 	Identity *IdentityConfig `mapstructure:"identity"`
+	Database *DBConfig       `mapstructure:"database"`
 	Port     int             `mapstructure:"port"`
 	Env      string          `mapstructure:"env"`
 	Addr     string          `mapstructure:"addr"`
+}
+
+type DBConfig struct {
+	Driver string `mapstructure:"driver"`
+	DSN    string `mapstructure:"dsn"`
 }
 
 type IdentityConfig struct {
@@ -106,6 +112,10 @@ func LoadConfig() (*Config, error) {
 	viper.SetDefault("log.exporter", "stdout")
 	viper.SetDefault("log.format", "text")
 	viper.SetDefault("otel.enabled", false)
+
+	// Database defaults
+	viper.SetDefault("database.driver", "sqlite")
+	viper.SetDefault("database.dsn", "file:hyprship.db?cache=shared&mode=rwc")
 
 	// Identity defaults
 	viper.SetDefault("identity.password.min_length", 12)
