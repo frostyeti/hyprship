@@ -39,6 +39,7 @@ Implement a password hashing utility using PBKDF2 with SHA-256, a 32-byte salt, 
    - Extract iterations and algo from the hash and return `true` if they differ from the `pbkdf2Hasher`'s current configured defaults.
 
 ## Phase 3: Encryption (aesgcm)
+
 Implement a symmetric encryption utility using AES-256-GCM. The key is derived using PBKDF2-SHA256 from a provided passphrase.
 
 1. **Path:** `apps/api/crypto/aesgcm.go` (Note: Issue says `internal/crypto/aesgcm.go` but since we are building an `apps/api/crypto` module and `pbkdf2` is there, we will put it in `apps/api/crypto/aesgcm.go` for consistency unless explicitly directed otherwise. We will use `apps/api/crypto/aesgcm.go`).
@@ -71,6 +72,7 @@ Implement a symmetric encryption utility using AES-256-GCM. The key is derived u
    - Decrypt the ciphertext using the GCM wrapper.
 
 ## Phase 4: Testing
+
 Write comprehensive unit tests ensuring robustness and correctness.
 
 1. **Path:** `apps/api/crypto/pbkdf2_test.go` and `apps/api/crypto/aesgcm_test.go`
@@ -85,6 +87,7 @@ Write comprehensive unit tests ensuring robustness and correctness.
    - Explicit binary layout verification tests to ensure byte packing matches the specification exactly.
 
 ## Phase 5: Documentation Updates
+
 1. **New Doc:** Create `apps/api/docs/crypto.md` detailing the binary layouts, usage, and parameters for PBKDF2 and AES-GCM.
 2. **Update AGENTS.md:** Append a new "Cryptography" section to `apps/api/AGENTS.md` explaining:
    - Use hashing (PBKDF2) for internal application passwords and API keys.

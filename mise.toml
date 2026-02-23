@@ -7,6 +7,8 @@ go = "latest"
 jq = "latest"
 rg = "latest"
 yq = "latest"
+node = "latest"
+"markdownlint-cli2" = "latest"
 
 [env]
 _.path = [

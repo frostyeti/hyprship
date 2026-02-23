@@ -1,0 +1,14 @@
+DROP TABLE user_api_keys_roles;
+DROP TABLE user_api_keys;
+DROP TABLE role_claims;
+DROP TABLE users_roles;
+DROP TABLE roles;
+DROP TABLE user_claims;
+DROP TABLE user_passkey;
+DROP TABLE user_login_providers;
+DROP TABLE user_totp;
+DROP TABLE user_sessions;
+DROP TABLE user_password_auth;
+DROP TABLE users_phones;
+DROP TABLE users_emails;
+DROP TABLE users;
