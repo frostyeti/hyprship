@@ -17,8 +17,10 @@ import (
 )
 
 type MockIdentityService struct {
-	LoginFunc  func(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error)
-	LogoutFunc func(ctx context.Context, sessionID uuid.UUID) error
+	LoginFunc          func(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error)
+	LogoutFunc         func(ctx context.Context, sessionID uuid.UUID) error
+	ForgotPasswordFunc func(ctx context.Context, email string) error
+	ResetPasswordFunc  func(ctx context.Context, email string, token string, newPassword string) error
 }
 
 func (m *MockIdentityService) LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error) {
@@ -36,6 +38,20 @@ func (m *MockIdentityService) Logout(ctx context.Context, sessionID uuid.UUID) e
 }
 
 func (m *MockIdentityService) ChangePassword(ctx context.Context, userID uuid.UUID, oldPassword string, newPassword string) error {
+	return nil
+}
+
+func (m *MockIdentityService) ForgotPassword(ctx context.Context, email string) error {
+	if m.ForgotPasswordFunc != nil {
+		return m.ForgotPasswordFunc(ctx, email)
+	}
+	return nil
+}
+
+func (m *MockIdentityService) ResetPassword(ctx context.Context, email string, token string, newPassword string) error {
+	if m.ResetPasswordFunc != nil {
+		return m.ResetPasswordFunc(ctx, email, token, newPassword)
+	}
 	return nil
 }
 
