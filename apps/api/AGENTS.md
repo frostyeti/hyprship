@@ -82,6 +82,11 @@ Use the name `stores` for repositories and store for `respository`.  e.g. `UserS
 
 Use the golang-interfaces skill for designing interfaces for repositories.
 
+### Configuration
+
+**Always** update `apps/api/docs/configuration.md` when adding, changing, or removing configuration settings in `apps/api/config/config.go`.
+Use the prefix `HYPRSHIP` for all environment variables with `viper`.
+
 ### API Design
 
 **Always** use the skill `rest-api-design` when working on REST APIS, including planning
@@ -152,11 +157,36 @@ Use golang and gin for the API.  UPDATE the list of modules as needed
 - github.com/frostyeti/go/env
 - go.yaml.in/yaml/v4
 - github.com/spf13/viper
-- github.com/rs/zerolog
+- log/slog
+- github.com/samber/slog-gin
+- github.com/lmittmann/tint
 - github.com/open-telemetry/opentelemetry-go
 - github.com/gin-gonic/gin
 - net/http/httptest
 - golang.org/x/time/rate
+
+### Logging (slog)
+
+- Always use the structured logging package `log/slog`.
+- Avoid high-allocation debug or info logging statements when not needed. **Always** check if the level is enabled before logging high cost statements:
+  ```go
+  if logger.Enabled(ctx, slog.LevelDebug) {
+      slog.Debug("costly debug message", "data", getCostlyData())
+  }
+  ```
+- Use `slog.Group` to structure related log attributes.
+
+### OpenTelemetry (Telemetry)
+
+- Only trace and measure when OpenTelemetry is enabled (`cfg.Otel.Enabled == true`).
+- Ensure tracing or metrics spans are only initialized if an exporter that supports it is configured. (e.g. `prometheus` does not support tracing for Go Otel).
+- Add OpenTelemetry collectors/instrumentation for databases and datastores as they are implemented.
+- Follow the OpenTelemetry Semantic Conventions (see [semconv](https://opentelemetry.io/docs/concepts/semantic-conventions/)).
+
+### Cryptography
+
+- **Hashing:** Use the PBKDF2 hasher in `apps/api/crypto` for internal application passwords, API keys, or any secrets that only need to be verified and never retrieved in plaintext. A good hint for the database schema is that any column ending with `_digest` should use the hasher.
+- **Encryption:** Use the AES-GCM encryption driver in `apps/api/crypto` for secrets that are stored for external apps and systems. These secrets must be encrypted at rest so they can be decrypted when sent to the service.
 
 ## Project Structure
 

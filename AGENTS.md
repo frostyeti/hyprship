@@ -11,6 +11,11 @@ and manage infra.
   be greatly improved, suggest an updated design and prompt the user for input.
 - Run linters and formatters before completing the task and fix lint errors.
 - Run tests before completing the task and fix tests.  
+- Format commits following the Conventional Commits specification.
+  - Structure: `<type>[optional scope]: <description>`
+  - Types: `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
+  - Scopes: Indicate project component e.g. `feat(api)`, `fix(ui)`
+  - Link GitHub issues in the description or footer (e.g. `#1`, `Resolves #1`, `Fixes #1`)
   
 
 ## ⚠️ ASK FIRST

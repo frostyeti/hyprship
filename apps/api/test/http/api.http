@@ -1,0 +1,8 @@
+### GET ping
+GET http://localhost:8080/api/v1/ping
+
+### GET healthz
+GET http://localhost:8080/api/v1/healthz
+
+### GET sample
+GET http://localhost:8080/api/v1/sample
