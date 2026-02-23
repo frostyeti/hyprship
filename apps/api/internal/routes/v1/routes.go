@@ -4,13 +4,23 @@ import (
 	"net/http"
 
 	"github.com/frostyeti/hyprship/apps/api/internal/routes"
+	"github.com/frostyeti/hyprship/apps/api/internal/svc/identity"
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(r *gin.RouterGroup) {
+func RegisterRoutes(r *gin.RouterGroup, identitySvc identity.IdentityService) {
 	r.GET("/ping", Ping)
 	r.GET("/healthz", Healthz)
 	r.GET("/sample", Sample)
+
+	authGroup := r.Group("/auth")
+	RegisterAuthRoutes(authGroup, identitySvc)
+
+	// usersGroup := r.Group("/users")
+	// RegisterUserRoutes(usersGroup, identitySvc, userStore)
+	
+	// rolesGroup := r.Group("/roles")
+	// RegisterRoleRoutes(rolesGroup, identitySvc, roleStore)
 }
 
 func Ping(c *gin.Context) {
