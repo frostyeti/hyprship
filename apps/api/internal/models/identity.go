@@ -55,6 +55,20 @@ type UserAPIKey struct {
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 }
 
+type UserPasswordAuth struct {
+	UserID            uuid.UUID  `json:"userId"`
+	PasswordDigest    string     `json:"-"`
+	PasswordExpiresAt *time.Time `json:"passwordExpiresAt,omitempty"`
+	LastAttemptedAt   *time.Time `json:"lastAttemptedAt,omitempty"`
+	AttemptCount      int        `json:"attemptCount"`
+	OtpDigest         *string    `json:"-"`
+	OtpExpiresAt      *time.Time `json:"otpExpiresAt,omitempty"`
+	OtpLinkToken      *string    `json:"-"`
+	IsLocked          bool       `json:"isLocked"`
+	CreatedAt         time.Time  `json:"createdAt"`
+	UpdatedAt         *time.Time `json:"updatedAt,omitempty"`
+}
+
 type UserSession struct {
 	ID        uuid.UUID  `json:"id"`
 	UserID    uuid.UUID  `json:"userId"`

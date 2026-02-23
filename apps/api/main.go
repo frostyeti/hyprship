@@ -7,8 +7,8 @@ import (
 	"log/slog"
 
 	"github.com/frostyeti/hyprship/apps/api/config"
-	v1 "github.com/frostyeti/hyprship/apps/api/routes/v1"
-	"github.com/frostyeti/hyprship/apps/api/telemetry"
+	v1 "github.com/frostyeti/hyprship/apps/api/internal/routes/v1"
+	"github.com/frostyeti/hyprship/apps/api/internal/telemetry"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
 	"go.opentelemetry.io/contrib/instrumentation/github.com/gin-gonic/gin/otelgin"
