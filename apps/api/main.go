@@ -79,7 +79,7 @@ func main() {
 	}
 
 	apiV1 := r.Group("/api/v1")
-	v1.RegisterRoutes(apiV1, identitySvc)
+	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore)
 
 	addr := cfg.Addr
 	if addr == "" {
@@ -87,7 +87,7 @@ func main() {
 	}
 
 	slog.Info("Starting API server", "addr", addr, "env", cfg.Env)
-	
+
 	// Graceful shutdown
 	go func() {
 		if err := r.Run(addr); err != nil {

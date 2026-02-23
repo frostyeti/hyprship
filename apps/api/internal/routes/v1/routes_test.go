@@ -15,7 +15,7 @@ func setupRouter() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	v1Group := r.Group("/api/v1")
-	RegisterRoutes(v1Group, nil)
+	RegisterRoutes(v1Group, nil, nil, nil)
 	return r
 }
 

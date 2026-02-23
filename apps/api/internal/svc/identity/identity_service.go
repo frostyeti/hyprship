@@ -26,6 +26,8 @@ type IdentityService interface {
 	LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error)
 	Logout(ctx context.Context, sessionID uuid.UUID) error
 	ChangePassword(ctx context.Context, userID uuid.UUID, oldPassword string, newPassword string) error
+	ForgotPassword(ctx context.Context, email string) error
+	ResetPassword(ctx context.Context, email string, token string, newPassword string) error
 	// SetPassword bypasses the old password check, usually used for resets or admin actions
 	SetPassword(ctx context.Context, userID uuid.UUID, newPassword string) error
 }
