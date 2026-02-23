@@ -87,7 +87,7 @@ func LoadConfig() (*Config, error) {
 	pflag.Bool("otel.enabled", false, "Enable OpenTelemetry")
 	pflag.Parse()
 
-	viper.BindPFlags(pflag.CommandLine)
+	_ = viper.BindPFlags(pflag.CommandLine)
 
 	viper.SetEnvPrefix("HYPRSHIP")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))

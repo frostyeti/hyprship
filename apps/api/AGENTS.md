@@ -198,23 +198,27 @@ UPDATE this section as needed.
 claims/                  # consts for claim names
   permissions/           # consts for permissions
 config/                  # vipr configuration
-db/
-  actions/
-  migrations/
-  seed/
-  migator.go
-  seeder.go
-routes/                  # api routes may go here
-  v1/                    # version 1 routes go 
-validators/              # validators
-stores/                  # repositories
-  mssql/                 # microsoft sql server impl for stores
-  mysql/                 # mysql/maria db impl for stores
-  pg/                    # postgres db impl for stores
-  sqlite/                # sqlite db impl for stores
-svc/                     # services may go here or in child folders
-telemetry/               # logging and otel goes here
-
+internal/
+  core/                  # shared models and interfaces
+  crypto/                # hashing and encryption drivers
+  db/                    # database schema and tools
+    actions/
+    migrations/
+    seed/
+    migrator.go
+    seeder.go
+  models/                # data models
+  routes/                # api routes may go here
+    v1/                  # version 1 routes go 
+  validators/            # validators
+  stores/                # repositories
+    mssql/               # microsoft sql server impl for stores
+    mysql/               # mysql/maria db impl for stores
+    pg/                  # postgres db impl for stores
+    sqlite/              # sqlite db impl for stores
+  svc/                   # services may go here or in child folders
+  telemetry/             # logging and otel goes here
+  test/                  # integration and e2e testing tools
 ```
 
 Shared code is placed at `../../internal`. If you are in the
