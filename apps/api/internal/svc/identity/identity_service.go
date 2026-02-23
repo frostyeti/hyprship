@@ -24,6 +24,7 @@ var (
 
 type IdentityService interface {
 	LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error)
+	Logout(ctx context.Context, sessionID uuid.UUID) error
 	ChangePassword(ctx context.Context, userID uuid.UUID, oldPassword string, newPassword string) error
 	// SetPassword bypasses the old password check, usually used for resets or admin actions
 	SetPassword(ctx context.Context, userID uuid.UUID, newPassword string) error
@@ -147,6 +148,10 @@ func (s *identityService) LoginWithPassword(ctx context.Context, email string, p
 	}
 
 	return session, nil
+}
+
+func (s *identityService) Logout(ctx context.Context, sessionID uuid.UUID) error {
+	return s.sessionStore.Delete(ctx, sessionID)
 }
 
 func (s *identityService) ChangePassword(ctx context.Context, userID uuid.UUID, oldPassword string, newPassword string) error {

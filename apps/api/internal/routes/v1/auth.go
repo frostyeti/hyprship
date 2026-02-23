@@ -7,6 +7,7 @@ import (
 	"github.com/frostyeti/hyprship/apps/api/internal/routes"
 	"github.com/frostyeti/hyprship/apps/api/internal/svc/identity"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type AuthHandler struct {
@@ -15,8 +16,9 @@ type AuthHandler struct {
 
 func RegisterAuthRoutes(r *gin.RouterGroup, svc identity.IdentityService) {
 	h := &AuthHandler{svc: svc}
-	
+
 	r.POST("/login", h.Login)
+	r.POST("/logout", h.Logout)
 }
 
 type LoginRequest struct {
@@ -36,7 +38,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 
 	ip := c.ClientIP()
 	userAgent := c.Request.UserAgent()
-	
+
 	session, err := h.svc.LoginWithPassword(c.Request.Context(), req.Email, req.Password, &ip, &userAgent)
 	if err != nil {
 		code := "invalid_credentials"
@@ -56,4 +58,31 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, routes.SuccessResponse(session))
+}
+
+type LogoutRequest struct {
+	SessionID string `json:"sessionId" binding:"required,uuid"`
+}
+
+func (h *AuthHandler) Logout(c *gin.Context) {
+	var req LogoutRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{
+			Code:    "validation_failed",
+			Message: err.Error(),
+		}))
+		return
+	}
+
+	sessionUUID, _ := uuid.Parse(req.SessionID)
+
+	if err := h.svc.Logout(c.Request.Context(), sessionUUID); err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{
+			Code:    "logout_failed",
+			Message: "Failed to revoke session",
+		}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
 }
