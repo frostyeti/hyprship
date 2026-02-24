@@ -1,0 +1,29 @@
+--- apps/api/internal/routes/v1/auth.go
++++ apps/api/internal/routes/v1/auth.go
+@@ -113,9 +113,67 @@
+ }
+ 
++type StartPasskeyLoginRequest struct {
++	Email string `json:"email" binding:"required,email"`
++}
++
+ func (h *AuthHandler) StartPasskeyLogin(c *gin.Context) {
+-	c.JSON(http.StatusNotImplemented, routes.ErrorResponse(&routes.ApiError{Code: "not_implemented"}))
++	var req StartPasskeyLoginRequest
++	if err := c.ShouldBindJSON(&req); err != nil {
++		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{
++			Code:    "validation_failed",
++			Message: err.Error(),
++		}))
++		return
++	}
++
++	// Get user by email indirectly through identity service or we need to inject userStore.
++	// Wait, AuthHandler doesn't have UserStore injected. 
++	// Let's add user fetching logic inside PasskeyService! 
++	// Actually, we can just inject UserStore into AuthHandler.
+ }
+ 
+ func (h *AuthHandler) FinishPasskeyLogin(c *gin.Context) {
+-	c.JSON(http.StatusNotImplemented, routes.ErrorResponse(&routes.ApiError{Code: "not_implemented"}))
+ }

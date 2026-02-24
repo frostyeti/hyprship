@@ -23,11 +23,12 @@ type MockIdentityService struct {
 	ResetPasswordFunc  func(ctx context.Context, email string, token string, newPassword string) error
 }
 
-func (m *MockIdentityService) LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error) {
+func (m *MockIdentityService) LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, *string, error) {
 	if m.LoginFunc != nil {
-		return m.LoginFunc(ctx, email, password, ipAddress, userAgent)
+		sess, err := m.LoginFunc(ctx, email, password, ipAddress, userAgent)
+		return sess, nil, err
 	}
-	return nil, nil
+	return nil, nil, nil
 }
 
 func (m *MockIdentityService) Logout(ctx context.Context, sessionID uuid.UUID) error {
@@ -79,7 +80,7 @@ func TestAuthLogin(t *testing.T) {
 		},
 	}
 
-	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc)
+	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc, nil, nil, nil)
 
 	body, _ := json.Marshal(LoginRequest{
 		Email:    "test@test.com",
@@ -113,7 +114,7 @@ func TestAuthLogout(t *testing.T) {
 		},
 	}
 
-	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc)
+	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc, nil, nil, nil)
 
 	body, _ := json.Marshal(LogoutRequest{
 		SessionID: uuid.New().String(),
@@ -132,4 +133,8 @@ func TestAuthLogout(t *testing.T) {
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)
 	assert.Equal(t, "ok", response.Value)
+}
+
+func (m *MockIdentityService) CreateSession(ctx context.Context, userID uuid.UUID, ipAddress *string, userAgent *string) (*models.UserSession, error) {
+	return nil, nil
 }

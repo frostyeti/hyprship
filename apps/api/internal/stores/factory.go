@@ -16,6 +16,9 @@ type StoreFactory struct {
 	UserPasswordAuthStore    UserPasswordAuthStore
 	UserSessionStore         UserSessionStore
 	UserPasswordHistoryStore UserPasswordHistoryStore
+	UserAPIKeyStore          UserAPIKeyStore
+	UserPasskeyStore         UserPasskeyStore
+	UserTotpStore            UserTotpStore
 }
 
 func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
@@ -27,6 +30,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserPasswordAuthStore:    sqlite.NewUserPasswordAuthStore(db),
 			UserSessionStore:         sqlite.NewUserSessionStore(db),
 			UserPasswordHistoryStore: sqlite.NewUserPasswordHistoryStore(db),
+			UserAPIKeyStore:          sqlite.NewUserAPIKeyStore(db),
+			UserPasskeyStore:         sqlite.NewUserPasskeyStore(db),
+			UserTotpStore:            sqlite.NewUserTotpStore(db),
 		}, nil
 	case "pg", "postgres":
 		return &StoreFactory{
@@ -35,6 +41,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserPasswordAuthStore:    pg.NewUserPasswordAuthStore(db),
 			UserSessionStore:         pg.NewUserSessionStore(db),
 			UserPasswordHistoryStore: pg.NewUserPasswordHistoryStore(db),
+			UserAPIKeyStore:          pg.NewUserAPIKeyStore(db),
+			UserPasskeyStore:         pg.NewUserPasskeyStore(db),
+			UserTotpStore:            pg.NewUserTotpStore(db),
 		}, nil
 	case "mysql", "mariadb":
 		return &StoreFactory{
@@ -43,6 +52,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserPasswordAuthStore:    mysql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mysql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mysql.NewUserPasswordHistoryStore(db),
+			UserAPIKeyStore:          mysql.NewUserAPIKeyStore(db),
+			UserPasskeyStore:         mysql.NewUserPasskeyStore(db),
+			UserTotpStore:            mysql.NewUserTotpStore(db),
 		}, nil
 	case "mssql", "sqlserver":
 		return &StoreFactory{
@@ -51,6 +63,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserPasswordAuthStore:    mssql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mssql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mssql.NewUserPasswordHistoryStore(db),
+			UserAPIKeyStore:          mssql.NewUserAPIKeyStore(db),
+			UserPasskeyStore:         mssql.NewUserPasskeyStore(db),
+			UserTotpStore:            mssql.NewUserTotpStore(db),
 		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported database driver: %s", driver)

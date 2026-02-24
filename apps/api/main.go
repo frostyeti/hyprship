@@ -66,6 +66,23 @@ func main() {
 		crypto.GetPasswordHasher("pbkdf2"),
 	)
 
+	apiKeySvc := identity.NewAPIKeyService(
+		storeFactory.UserAPIKeyStore,
+		crypto.GetPasswordHasher("pbkdf2"),
+	)
+
+	passkeySvc, err := identity.NewPasskeyService(
+		storeFactory.UserPasskeyStore,
+		"Hyprship",
+		"localhost",
+		"http://localhost:3000",
+	)
+	if err != nil {
+		slog.Error("Failed to initialize PasskeyService", "error", err)
+	}
+
+	mfaSvc := identity.NewMfaService(storeFactory.UserTotpStore, storeFactory.UserPasswordAuthStore, "Hyprship")
+
 	if cfg.Env != "development" {
 		gin.SetMode(gin.ReleaseMode)
 	}
@@ -79,7 +96,7 @@ func main() {
 	}
 
 	apiV1 := r.Group("/api/v1")
-	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore, storeFactory.UserSessionStore)
+	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore, storeFactory.UserSessionStore, apiKeySvc, passkeySvc, mfaSvc)
 
 	addr := cfg.Addr
 	if addr == "" {

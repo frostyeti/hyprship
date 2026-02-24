@@ -9,16 +9,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(r *gin.RouterGroup, identitySvc identity.IdentityService, userStore stores.UserStore, roleStore stores.RoleStore, sessionStore stores.UserSessionStore) {
+func RegisterRoutes(r *gin.RouterGroup, identitySvc identity.IdentityService, userStore stores.UserStore, roleStore stores.RoleStore, sessionStore stores.UserSessionStore, apiKeySvc identity.APIKeyService, passkeySvc identity.PasskeyService, mfaSvc identity.MfaService) {
 	r.GET("/ping", Ping)
 	r.GET("/healthz", Healthz)
 	r.GET("/sample", Sample)
 
 	authGroup := r.Group("/auth")
-	RegisterAuthRoutes(authGroup, identitySvc)
+	RegisterAuthRoutes(authGroup, identitySvc, userStore, passkeySvc, mfaSvc)
 
 	usersGroup := r.Group("/users")
-	RegisterUserRoutes(usersGroup, identitySvc, userStore, sessionStore)
+	RegisterUserRoutes(usersGroup, identitySvc, userStore, sessionStore, apiKeySvc, passkeySvc, mfaSvc)
 
 	rolesGroup := r.Group("/roles")
 	RegisterRoleRoutes(rolesGroup, identitySvc, roleStore)

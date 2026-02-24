@@ -1,0 +1,2 @@
+sed -i 's/func (m \*MockIdentityService) CreateSession(ctx context.Context, userID uuid.UUID, ipAddress \*string, userAgent \*string) (\*models.UserSession, error) {/func (m \*MockIdentityService) CreateSession(ctx context.Context, userID uuid.UUID, ipAddress \*string, userAgent \*string) (\*models.UserSession, error) {/g' apps/api/internal/routes/v1/auth_test.go
+# Wait, line 139 is inside CreateSession. Let's look at the file.

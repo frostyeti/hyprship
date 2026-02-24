@@ -20,10 +20,12 @@ var (
 	ErrPasswordHistoryReuse  = errors.New("password was used recently")
 	ErrPasswordPolicyFailed  = errors.New("password does not meet policy requirements")
 	ErrMaxConcurrentSessions = errors.New("maximum concurrent sessions reached")
+	ErrMfaRequired           = errors.New("mfa required")
 )
 
 type IdentityService interface {
-	LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error)
+	LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, *string, error)
+	CreateSession(ctx context.Context, userID uuid.UUID, ipAddress *string, userAgent *string) (*models.UserSession, error)
 	Logout(ctx context.Context, sessionID uuid.UUID) error
 	ChangePassword(ctx context.Context, userID uuid.UUID, oldPassword string, newPassword string) error
 	ForgotPassword(ctx context.Context, email string) error
@@ -71,26 +73,26 @@ func (s *identityService) validatePasswordPolicy(password string) error {
 	return nil
 }
 
-func (s *identityService) LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, error) {
+func (s *identityService) LoginWithPassword(ctx context.Context, email string, password string, ipAddress *string, userAgent *string) (*models.UserSession, *string, error) {
 	user, err := s.userStore.GetByEmail(ctx, email)
 	if err != nil {
-		return nil, ErrInvalidCredentials // Generic error to prevent user enumeration
+		return nil, nil, ErrInvalidCredentials // Generic error to prevent user enumeration
 	}
 
 	auth, err := s.authStore.Get(ctx, user.ID)
 	if err != nil {
-		return nil, ErrInvalidCredentials
+		return nil, nil, ErrInvalidCredentials
 	}
 
 	// Check Lockout
 	if auth.IsLocked {
-		return nil, ErrAccountLocked
+		return nil, nil, ErrAccountLocked
 	}
 	if auth.AttemptCount >= s.config.Identity.Lockout.MaxAttempts {
 		if auth.LastAttemptedAt != nil {
 			lockoutDuration := time.Duration(s.config.Identity.Lockout.DurationMinutes) * time.Minute
 			if time.Since(*auth.LastAttemptedAt) < lockoutDuration {
-				return nil, ErrAccountLocked
+				return nil, nil, ErrAccountLocked
 			}
 			// Lockout expired, reset attempt count (we do this below if successful, or we just proceed)
 		}
@@ -108,48 +110,37 @@ func (s *identityService) LoginWithPassword(ctx context.Context, email string, p
 		}
 		if err := s.authStore.Update(ctx, auth); err != nil {
 			// Log error in a real app, returning invalid credentials anyway
-			return nil, ErrInvalidCredentials
+			return nil, nil, ErrInvalidCredentials
 		}
-		return nil, ErrInvalidCredentials
+		return nil, nil, ErrInvalidCredentials
 	}
 
 	// Password valid, check expiration
 	if auth.PasswordExpiresAt != nil && time.Now().After(*auth.PasswordExpiresAt) {
-		return nil, ErrPasswordExpired
+		return nil, nil, ErrPasswordExpired
 	}
 
 	// Reset attempts on success
 	auth.AttemptCount = 0
 	auth.IsLocked = false
 	if err := s.authStore.Update(ctx, auth); err != nil {
-		return nil, err
+		return nil, nil, err
+	}
+
+	if auth.TotpEnabled {
+		// Generate an MFA token to be used in the next step
+		mfaToken := uuid.New().String()
+		SaveMfaSessionData(mfaToken, user.ID)
+		return nil, &mfaToken, ErrMfaRequired
 	}
 
 	// Session management
-	if s.config.Identity.Sessions.MaxConcurrent > 0 {
-		sessions, err := s.sessionStore.ListByUser(ctx, user.ID)
-		if err == nil && len(sessions) >= s.config.Identity.Sessions.MaxConcurrent {
-			return nil, ErrMaxConcurrentSessions
-			// Alternatively, could delete oldest session
-		}
+	session, err := s.CreateSession(ctx, user.ID, ipAddress, userAgent)
+	if err != nil {
+		return nil, nil, err
 	}
 
-	// Create Session
-	session := &models.UserSession{
-		ID:        uuid.New(),
-		UserID:    user.ID,
-		Token:     uuid.New().String(), // Placeholder for token generation, possibly JWT
-		IPAddress: ipAddress,
-		UserAgent: userAgent,
-		ExpiresAt: time.Now().Add(time.Duration(s.config.Identity.Sessions.TTLMinutes) * time.Minute),
-		CreatedAt: time.Now(),
-	}
-
-	if err := s.sessionStore.Create(ctx, session); err != nil {
-		return nil, err
-	}
-
-	return session, nil
+	return session, nil, nil
 }
 
 func (s *identityService) Logout(ctx context.Context, sessionID uuid.UUID) error {
@@ -230,4 +221,32 @@ func (s *identityService) SetPassword(ctx context.Context, userID uuid.UUID, new
 	}
 
 	return err
+}
+
+func (s *identityService) CreateSession(ctx context.Context, userID uuid.UUID, ipAddress *string, userAgent *string) (*models.UserSession, error) {
+	// Session management
+	if s.config.Identity.Sessions.MaxConcurrent > 0 {
+		sessions, err := s.sessionStore.ListByUser(ctx, userID)
+		if err == nil && len(sessions) >= s.config.Identity.Sessions.MaxConcurrent {
+			return nil, ErrMaxConcurrentSessions
+			// Alternatively, could delete oldest session
+		}
+	}
+
+	// Create Session
+	session := &models.UserSession{
+		ID:        uuid.New(),
+		UserID:    userID,
+		Token:     uuid.New().String(), // Placeholder for token generation, possibly JWT
+		IPAddress: ipAddress,
+		UserAgent: userAgent,
+		ExpiresAt: time.Now().Add(time.Duration(s.config.Identity.Sessions.TTLMinutes) * time.Minute),
+		CreatedAt: time.Now(),
+	}
+
+	if err := s.sessionStore.Create(ctx, session); err != nil {
+		return nil, err
+	}
+
+	return session, nil
 }
