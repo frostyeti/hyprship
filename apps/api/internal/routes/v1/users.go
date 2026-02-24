@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/frostyeti/hyprship/apps/api/internal/core"
+	"github.com/frostyeti/hyprship/apps/api/internal/middleware"
 	"github.com/frostyeti/hyprship/apps/api/internal/models"
 	"github.com/frostyeti/hyprship/apps/api/internal/routes"
 	"github.com/frostyeti/hyprship/apps/api/internal/stores"
@@ -20,11 +21,90 @@ type UserHandler struct {
 func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.UserStore) {
 	h := &UserHandler{svc: svc, store: store}
 
-	r.GET("", h.ListUsers)
-	r.GET("/:id", h.GetUser)
-	r.POST("", h.CreateUser)
-	r.PUT("/:id", h.UpdateUser)
-	r.DELETE("/:id", h.DeleteUser)
+	// Unauthenticated / Self Routes (Require auth, but not necessarily admin roles)
+	meGroup := r.Group("/me")
+	meGroup.Use(middleware.RequireAuth())
+	meGroup.GET("", h.GetMe)
+	meGroup.PUT("", h.UpdateMe)
+
+	// Administrative Routes (Should require users:read or users:write)
+	adminGroup := r.Group("")
+	// adminGroup.Use(middleware.RequireAuth(), middleware.RequireClaim("permission", "users:read"))
+	adminGroup.GET("", h.ListUsers)
+	adminGroup.GET("/:id", h.GetUser)
+
+	// adminGroupWrite.Use(middleware.RequireAuth(), middleware.RequireClaim("permission", "users:write"))
+	adminGroup.POST("", h.CreateUser)
+	adminGroup.PUT("/:id", h.UpdateUser)
+	adminGroup.DELETE("/:id", h.DeleteUser)
+}
+
+func (h *UserHandler) GetMe(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{
+			Code:    "unauthorized",
+			Message: "User not authenticated",
+		}))
+		return
+	}
+
+	user, err := h.store.Get(c.Request.Context(), userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusNotFound, routes.ErrorResponse(&routes.ApiError{
+			Code:    "not_found",
+			Message: "User not found",
+		}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse(user))
+}
+
+func (h *UserHandler) UpdateMe(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{
+			Code:    "unauthorized",
+			Message: "User not authenticated",
+		}))
+		return
+	}
+
+	var req UpdateUserRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{
+			Code:    "validation_failed",
+			Message: err.Error(),
+		}))
+		return
+	}
+
+	user, err := h.store.Get(c.Request.Context(), userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusNotFound, routes.ErrorResponse(&routes.ApiError{
+			Code:    "not_found",
+			Message: "User not found",
+		}))
+		return
+	}
+
+	if req.Name != nil {
+		user.Name = req.Name
+	}
+	if req.Phone != nil {
+		user.PrimaryPhone = req.Phone
+	}
+
+	if err := h.store.Update(c.Request.Context(), user); err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{
+			Code:    "update_failed",
+			Message: err.Error(),
+		}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse(user))
 }
 
 func (h *UserHandler) ListUsers(c *gin.Context) {
