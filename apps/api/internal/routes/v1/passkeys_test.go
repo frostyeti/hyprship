@@ -93,7 +93,7 @@ func setupPasskeyRouter(mockSvc *MockPasskeyService, mockStore *MockUserStoreFor
 
 	api := r.Group("/api/v1")
 	usersGroup := api.Group("/users")
-	RegisterUserRoutes(usersGroup, nil, mockStore, nil, nil, mockSvc, nil)
+	RegisterUserRoutes(usersGroup, nil, mockStore, nil, nil, mockSvc, nil, nil)
 
 	authGroup := api.Group("/auth")
 	RegisterAuthRoutes(authGroup, nil, mockStore, mockSvc, nil)
