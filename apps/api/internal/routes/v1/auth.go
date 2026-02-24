@@ -23,6 +23,10 @@ func RegisterAuthRoutes(r *gin.RouterGroup, svc identity.IdentityService, userSt
 
 	r.POST("/login", h.Login)
 	r.POST("/login/mfa", h.LoginMfa)
+
+	// Passkey login
+	r.POST("/login/passkey/start", h.StartPasskeyLogin)
+	r.POST("/login/passkey/finish", h.FinishPasskeyLogin)
 	r.POST("/logout", h.Logout)
 	r.POST("/forgot-password", h.ForgotPassword)
 	r.POST("/reset-password", h.ResetPassword)

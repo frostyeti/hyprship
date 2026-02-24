@@ -47,6 +47,12 @@ func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store 
 	meGroup.POST("/mfa/verify", h.VerifyAndEnableMfa)
 	meGroup.DELETE("/mfa", h.DisableMfa)
 
+	// Self Passkey Management
+	meGroup.GET("/passkeys", h.ListMyPasskeys)
+	meGroup.POST("/passkeys/register/start", h.StartPasskeyRegistration)
+	meGroup.POST("/passkeys/register/finish", h.FinishPasskeyRegistration)
+	meGroup.DELETE("/passkeys/:passkeyId", h.DeleteMyPasskey)
+
 	// Administrative Routes (Should require users:read or users:write)
 	adminGroup := r.Group("")
 	// adminGroup.Use(middleware.RequireAuth(), middleware.RequireClaim("permission", "users:read"))
