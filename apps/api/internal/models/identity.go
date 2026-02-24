@@ -100,3 +100,28 @@ type UserTotp struct {
 	CreatedAt  time.Time  `json:"createdAt"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 }
+
+type UserEmail struct {
+	ID                uuid.UUID  `json:"id"`
+	UserID            uuid.UUID  `json:"userId"`
+	Email             *string    `json:"email,omitempty"`
+	EmailUpcase       *string    `json:"-"`
+	EmailUpcaseDigest string     `json:"-"`
+	IsActive          bool       `json:"isActive"`
+	IsVerified        bool       `json:"isVerified"`
+	IsPrimary         bool       `json:"isPrimary"`
+	CreatedAt         time.Time  `json:"createdAt"`
+	UpdatedAt         *time.Time `json:"updatedAt,omitempty"`
+}
+
+type UserPhone struct {
+	ID          uuid.UUID  `json:"id"`
+	UserID      uuid.UUID  `json:"userId"`
+	Phone       *string    `json:"phone,omitempty"`
+	PhoneDigest string     `json:"-"`
+	IsActive    bool       `json:"isActive"`
+	IsVerified  bool       `json:"isVerified"`
+	IsPrimary   bool       `json:"isPrimary"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   *time.Time `json:"updatedAt,omitempty"`
+}
