@@ -19,6 +19,8 @@ type StoreFactory struct {
 	UserAPIKeyStore          UserAPIKeyStore
 	UserPasskeyStore         UserPasskeyStore
 	UserTotpStore            UserTotpStore
+	UserEmailStore           UserEmailStore
+	UserPhoneStore           UserPhoneStore
 }
 
 func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
@@ -33,6 +35,8 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserAPIKeyStore:          sqlite.NewUserAPIKeyStore(db),
 			UserPasskeyStore:         sqlite.NewUserPasskeyStore(db),
 			UserTotpStore:            sqlite.NewUserTotpStore(db),
+			UserEmailStore:           sqlite.NewUserEmailStore(db),
+			UserPhoneStore:           sqlite.NewUserPhoneStore(db),
 		}, nil
 	case "pg", "postgres":
 		return &StoreFactory{
@@ -44,6 +48,8 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserAPIKeyStore:          pg.NewUserAPIKeyStore(db),
 			UserPasskeyStore:         pg.NewUserPasskeyStore(db),
 			UserTotpStore:            pg.NewUserTotpStore(db),
+			UserEmailStore:           pg.NewUserEmailStore(db),
+			UserPhoneStore:           pg.NewUserPhoneStore(db),
 		}, nil
 	case "mysql", "mariadb":
 		return &StoreFactory{
@@ -55,6 +61,8 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserAPIKeyStore:          mysql.NewUserAPIKeyStore(db),
 			UserPasskeyStore:         mysql.NewUserPasskeyStore(db),
 			UserTotpStore:            mysql.NewUserTotpStore(db),
+			UserEmailStore:           mysql.NewUserEmailStore(db),
+			UserPhoneStore:           mysql.NewUserPhoneStore(db),
 		}, nil
 	case "mssql", "sqlserver":
 		return &StoreFactory{
@@ -66,6 +74,8 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserAPIKeyStore:          mssql.NewUserAPIKeyStore(db),
 			UserPasskeyStore:         mssql.NewUserPasskeyStore(db),
 			UserTotpStore:            mssql.NewUserTotpStore(db),
+			UserEmailStore:           mssql.NewUserEmailStore(db),
+			UserPhoneStore:           mssql.NewUserPhoneStore(db),
 		}, nil
 	default:
 		return nil, fmt.Errorf("unsupported database driver: %s", driver)
