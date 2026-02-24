@@ -97,8 +97,10 @@ func main() {
 
 	apiV1 := r.Group("/api/v1")
 	verificationSvc := identity.NewVerificationService(storeFactory.UserEmailStore, storeFactory.UserPhoneStore, storeFactory.UserPasswordAuthStore)
+	importExportSvc := identity.NewImportExportService(storeFactory.UserStore, storeFactory.RoleStore)
 
-	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore, storeFactory.UserSessionStore, apiKeySvc, passkeySvc, mfaSvc, verificationSvc)
+
+	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore, storeFactory.UserSessionStore, apiKeySvc, passkeySvc, mfaSvc, verificationSvc, importExportSvc)
 
 	addr := cfg.Addr
 	if addr == "" {

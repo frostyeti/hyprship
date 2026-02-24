@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"io"
+
 	"net/http"
 	"strconv"
 	"time"
@@ -23,10 +25,11 @@ type UserHandler struct {
 	passkeySvc   identity.PasskeyService
 	mfaSvc       identity.MfaService
 	verificationSvc identity.VerificationService
+	importExportSvc identity.ImportExportService
 }
 
-func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.UserStore, sessionStore stores.UserSessionStore, apiKeySvc identity.APIKeyService, passkeySvc identity.PasskeyService, mfaSvc identity.MfaService, verificationSvc identity.VerificationService) {
-	h := &UserHandler{svc: svc, store: store, sessionStore: sessionStore, apiKeySvc: apiKeySvc, passkeySvc: passkeySvc, mfaSvc: mfaSvc, verificationSvc: verificationSvc}
+func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.UserStore, sessionStore stores.UserSessionStore, apiKeySvc identity.APIKeyService, passkeySvc identity.PasskeyService, mfaSvc identity.MfaService, verificationSvc identity.VerificationService, importExportSvc identity.ImportExportService) {
+	h := &UserHandler{svc: svc, store: store, sessionStore: sessionStore, apiKeySvc: apiKeySvc, passkeySvc: passkeySvc, mfaSvc: mfaSvc, verificationSvc: verificationSvc, importExportSvc: importExportSvc}
 
 	// Unauthenticated / Self Routes (Require auth, but not necessarily admin roles)
 	meGroup := r.Group("/me")
@@ -63,6 +66,8 @@ func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store 
 
 	// Administrative Routes (Should require users:read or users:write)
 	adminGroup := r.Group("")
+	adminGroup.POST("/import", h.ImportUsers)
+	adminGroup.GET("/export", h.ExportUsers)
 	// adminGroup.Use(middleware.RequireAuth(), middleware.RequireClaim("permission", "users:read"))
 	adminGroup.GET("", h.ListUsers)
 	adminGroup.GET("/:id", h.GetUser)
@@ -860,4 +865,41 @@ func (h *UserHandler) ConfirmPhone(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ImportUsers(c *gin.Context) {
+	// Should require users:write
+	format := c.Query("format")
+	if format == "" {
+		format = "json"
+	}
+	
+	data, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_body", Message: err.Error()}))
+		return
+	}
+
+	if err := h.importExportSvc.ImportUsers(c.Request.Context(), format, data); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "import_failed", Message: err.Error()}))
+		return
+	}
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ExportUsers(c *gin.Context) {
+	// Should require users:read
+	format := c.Query("format")
+	if format == "" {
+		format = "json"
+	}
+
+	data, err := h.importExportSvc.ExportUsers(c.Request.Context(), format)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "export_failed", Message: err.Error()}))
+		return
+	}
+
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename=\"users_export."+format+"\"")
+	c.Data(http.StatusOK, "application/octet-stream", data)
 }

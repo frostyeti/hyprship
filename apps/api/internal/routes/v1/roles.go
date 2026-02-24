@@ -1,6 +1,8 @@
 package v1
 
 import (
+	"io"
+
 	"net/http"
 	"strconv"
 
@@ -14,12 +16,16 @@ import (
 )
 
 type RoleHandler struct {
-	svc   identity.IdentityService
-	store stores.RoleStore
+	svc             identity.IdentityService
+	store           stores.RoleStore
+	importExportSvc identity.ImportExportService
 }
 
-func RegisterRoleRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.RoleStore) {
-	h := &RoleHandler{svc: svc, store: store}
+func RegisterRoleRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.RoleStore, importExportSvc identity.ImportExportService) {
+	h := &RoleHandler{svc: svc, store: store, importExportSvc: importExportSvc}
+
+	r.POST("/import", h.ImportRoles)
+	r.GET("/export", h.ExportRoles)
 
 	r.GET("", h.ListRoles)
 	r.GET("/:id", h.GetRole)
@@ -243,4 +249,41 @@ func (h *RoleHandler) RemoveRoleClaim(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *RoleHandler) ImportRoles(c *gin.Context) {
+	// Should require roles:write
+	format := c.Query("format")
+	if format == "" {
+		format = "json"
+	}
+	
+	data, err := io.ReadAll(c.Request.Body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_body", Message: err.Error()}))
+		return
+	}
+
+	if err := h.importExportSvc.ImportRoles(c.Request.Context(), format, data); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "import_failed", Message: err.Error()}))
+		return
+	}
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *RoleHandler) ExportRoles(c *gin.Context) {
+	// Should require roles:read
+	format := c.Query("format")
+	if format == "" {
+		format = "json"
+	}
+
+	data, err := h.importExportSvc.ExportRoles(c.Request.Context(), format)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "export_failed", Message: err.Error()}))
+		return
+	}
+
+	c.Writer.Header().Set("Content-Disposition", "attachment; filename=\"roles_export."+format+"\"")
+	c.Data(http.StatusOK, "application/octet-stream", data)
 }
