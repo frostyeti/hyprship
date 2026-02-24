@@ -41,18 +41,20 @@ type RoleClaim struct {
 }
 
 type UserAPIKey struct {
-	ID         int32      `json:"id"`
-	UserID     uuid.UUID  `json:"userId"`
-	Name       string     `json:"name"`
-	NameUpcase string     `json:"-"`
-	KeyHint    string     `json:"keyHint"`
-	KeyDigest  string     `json:"-"`
-	ExpiresAt  *time.Time `json:"expiresAt,omitempty"`
-	IsLocked   bool       `json:"isLocked"`
-	IsRevoked  bool       `json:"isRevoked"`
-	Comment    *string    `json:"comment,omitempty"`
-	CreatedAt  time.Time  `json:"createdAt"`
-	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
+	ID          int32      `json:"id"`
+	UserID      uuid.UUID  `json:"userId"`
+	Name        string     `json:"name"`
+	NameUpcase  string     `json:"-"`
+	KeyHint     string     `json:"keyHint"`
+	KeyDigest   string     `json:"-"`
+	ExpiresAt   *time.Time `json:"expiresAt,omitempty"`
+	IsLocked    bool       `json:"isLocked"`
+	TotpSecret  *string    `json:"-"`
+	TotpEnabled bool       `json:"totpEnabled"`
+	IsRevoked   bool       `json:"isRevoked"`
+	Comment     *string    `json:"comment,omitempty"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   *time.Time `json:"updatedAt,omitempty"`
 }
 
 type UserPasswordAuth struct {
@@ -65,6 +67,8 @@ type UserPasswordAuth struct {
 	OtpExpiresAt      *time.Time `json:"otpExpiresAt,omitempty"`
 	OtpLinkToken      *string    `json:"-"`
 	IsLocked          bool       `json:"isLocked"`
+	TotpSecret        *string    `json:"-"`
+	TotpEnabled       bool       `json:"totpEnabled"`
 	CreatedAt         time.Time  `json:"createdAt"`
 	UpdatedAt         *time.Time `json:"updatedAt,omitempty"`
 }
@@ -78,4 +82,21 @@ type UserSession struct {
 	UserAgent *string    `json:"userAgent,omitempty"`
 	CreatedAt time.Time  `json:"createdAt"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+type UserPasskey struct {
+	ID           uuid.UUID `json:"id"`
+	UserID       uuid.UUID `json:"userId"`
+	CredentialID []byte    `json:"credentialId"` // Stored as binary
+	Data         []byte    `json:"data"`         // Stored as JSON
+	CreatedAt    time.Time `json:"createdAt"`
+}
+
+type UserTotp struct {
+	ID         uuid.UUID  `json:"id"`
+	UserID     uuid.UUID  `json:"userId"`
+	Secret     string     `json:"-"`
+	IsVerified bool       `json:"isVerified"`
+	CreatedAt  time.Time  `json:"createdAt"`
+	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 }

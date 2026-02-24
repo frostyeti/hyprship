@@ -25,7 +25,7 @@ func TestForgotPassword(t *testing.T) {
 		},
 	}
 
-	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc)
+	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc, nil, nil, nil)
 
 	body, _ := json.Marshal(ForgotPasswordRequest{
 		Email: "user@example.com",
@@ -59,7 +59,7 @@ func TestResetPassword_Success(t *testing.T) {
 		},
 	}
 
-	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc)
+	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc, nil, nil, nil)
 
 	body, _ := json.Marshal(ResetPasswordRequest{
 		Email:       "user@example.com",
@@ -92,7 +92,7 @@ func TestResetPassword_Failure(t *testing.T) {
 		},
 	}
 
-	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc)
+	RegisterAuthRoutes(r.Group("/api/v1/auth"), mockSvc, nil, nil, nil)
 
 	body, _ := json.Marshal(ResetPasswordRequest{
 		Email:       "user@example.com",

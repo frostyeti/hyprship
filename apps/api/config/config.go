@@ -29,6 +29,13 @@ type IdentityConfig struct {
 	Lockout      LockoutConfig      `mapstructure:"lockout"`
 	Sessions     SessionsConfig     `mapstructure:"sessions"`
 	Reset        ResetConfig        `mapstructure:"reset"`
+	Passkeys     PasskeysConfig     `mapstructure:"passkeys"`
+}
+
+type PasskeysConfig struct {
+	RPDisplayName string `mapstructure:"rp_display_name"`
+	RPID          string `mapstructure:"rp_id"`
+	RPOrigin      string `mapstructure:"rp_origin"`
 }
 
 type PasswordConfig struct {
