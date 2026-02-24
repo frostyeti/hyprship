@@ -79,7 +79,7 @@ func main() {
 	}
 
 	apiV1 := r.Group("/api/v1")
-	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore)
+	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore, storeFactory.UserSessionStore)
 
 	addr := cfg.Addr
 	if addr == "" {
