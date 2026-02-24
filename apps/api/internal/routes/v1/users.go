@@ -64,6 +64,12 @@ func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store 
 	adminGroup.PUT("/:id", h.UpdateUser)
 	adminGroup.DELETE("/:id", h.DeleteUser)
 
+	adminGroup.GET("/:id/sessions", h.ListUserSessions)
+	adminGroup.DELETE("/:id/sessions/:sessionId", h.DeleteUserSession)
+	adminGroup.GET("/:id/api-keys", h.ListUserAPIKeys)
+	adminGroup.POST("/:id/api-keys", h.CreateUserAPIKey)
+	adminGroup.DELETE("/:id/api-keys/:keyId", h.DeleteUserAPIKey)
+
 	adminGroup.GET("/:id/claims", h.ListUserClaims)
 	adminGroup.POST("/:id/claims", h.AddUserClaim)
 	adminGroup.DELETE("/:id/claims/:claimId", h.RemoveUserClaim)
@@ -652,6 +658,102 @@ func (h *UserHandler) DeleteMyPasskey(c *gin.Context) {
 	}
 
 	if err := h.passkeySvc.DeletePasskey(c.Request.Context(), userID.(uuid.UUID), passkeyID); err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "delete_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ListUserSessions(c *gin.Context) {
+	userIDStr := c.Param("id")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_parameter", Message: "Invalid user ID"}))
+		return
+	}
+
+	sessions, err := h.sessionStore.ListByUser(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "list_failed", Message: "Failed to list sessions"}))
+		return
+	}
+	c.JSON(http.StatusOK, routes.SuccessResponse(sessions))
+}
+
+func (h *UserHandler) DeleteUserSession(c *gin.Context) {
+	sessionIDStr := c.Param("sessionId")
+	sessionID, err := uuid.Parse(sessionIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_parameter", Message: "Invalid session ID"}))
+		return
+	}
+
+	if err := h.sessionStore.Delete(c.Request.Context(), sessionID); err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "delete_failed", Message: "Failed to delete session"}))
+		return
+	}
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ListUserAPIKeys(c *gin.Context) {
+	userIDStr := c.Param("id")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_parameter", Message: "Invalid user ID"}))
+		return
+	}
+
+	keys, err := h.apiKeySvc.ListAPIKeys(c.Request.Context(), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "list_failed", Message: err.Error()}))
+		return
+	}
+	c.JSON(http.StatusOK, routes.SuccessResponse(keys))
+}
+
+func (h *UserHandler) CreateUserAPIKey(c *gin.Context) {
+	userIDStr := c.Param("id")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_parameter", Message: "Invalid user ID"}))
+		return
+	}
+
+	var req CreateAPIKeyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "validation_failed", Message: err.Error()}))
+		return
+	}
+
+	key, rawKey, err := h.apiKeySvc.CreateAPIKey(c.Request.Context(), userID, req.Name, req.Comment, req.ExpiresAt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "create_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusCreated, routes.SuccessResponse(map[string]any{
+		"apiKey": key,
+		"secret": rawKey,
+	}))
+}
+
+func (h *UserHandler) DeleteUserAPIKey(c *gin.Context) {
+	userIDStr := c.Param("id")
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_parameter", Message: "Invalid user ID"}))
+		return
+	}
+
+	keyIDStr := c.Param("keyId")
+	keyID, err := strconv.ParseInt(keyIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_parameter", Message: "Invalid key ID"}))
+		return
+	}
+
+	if err := h.apiKeySvc.RevokeAPIKey(c.Request.Context(), userID, int32(keyID)); err != nil {
 		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "delete_failed", Message: err.Error()}))
 		return
 	}
