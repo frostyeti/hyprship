@@ -22,10 +22,11 @@ type UserHandler struct {
 	apiKeySvc    identity.APIKeyService
 	passkeySvc   identity.PasskeyService
 	mfaSvc       identity.MfaService
+	verificationSvc identity.VerificationService
 }
 
-func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.UserStore, sessionStore stores.UserSessionStore, apiKeySvc identity.APIKeyService, passkeySvc identity.PasskeyService, mfaSvc identity.MfaService) {
-	h := &UserHandler{svc: svc, store: store, sessionStore: sessionStore, apiKeySvc: apiKeySvc, passkeySvc: passkeySvc, mfaSvc: mfaSvc}
+func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.UserStore, sessionStore stores.UserSessionStore, apiKeySvc identity.APIKeyService, passkeySvc identity.PasskeyService, mfaSvc identity.MfaService, verificationSvc identity.VerificationService) {
+	h := &UserHandler{svc: svc, store: store, sessionStore: sessionStore, apiKeySvc: apiKeySvc, passkeySvc: passkeySvc, mfaSvc: mfaSvc, verificationSvc: verificationSvc}
 
 	// Unauthenticated / Self Routes (Require auth, but not necessarily admin roles)
 	meGroup := r.Group("/me")
@@ -41,6 +42,13 @@ func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store 
 	meGroup.GET("/api-keys", h.ListMyAPIKeys)
 	meGroup.POST("/api-keys", h.CreateMyAPIKey)
 	meGroup.DELETE("/api-keys/:keyId", h.DeleteMyAPIKey)
+
+
+	// Verification Management
+	meGroup.POST("/email/verify", h.RequestEmailVerification)
+	meGroup.POST("/email/confirm", h.ConfirmEmail)
+	meGroup.POST("/phone/verify", h.RequestPhoneVerification)
+	meGroup.POST("/phone/confirm", h.ConfirmPhone)
 
 	// MFA Management
 	meGroup.POST("/mfa/setup", h.SetupMfa)
@@ -755,6 +763,99 @@ func (h *UserHandler) DeleteUserAPIKey(c *gin.Context) {
 
 	if err := h.apiKeySvc.RevokeAPIKey(c.Request.Context(), userID, int32(keyID)); err != nil {
 		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "delete_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+type RequestVerificationRequest struct {
+	Value string `json:"value" binding:"required"`
+}
+
+type ConfirmVerificationRequest struct {
+	Value string `json:"value" binding:"required"`
+	Token string `json:"token" binding:"required"`
+}
+
+func (h *UserHandler) RequestEmailVerification(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{Code: "unauthorized", Message: "User not authenticated"}))
+		return
+	}
+
+	var req RequestVerificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "validation_failed", Message: err.Error()}))
+		return
+	}
+
+	if err := h.verificationSvc.RequestEmailVerification(c.Request.Context(), userID.(uuid.UUID), req.Value); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "verification_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ConfirmEmail(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{Code: "unauthorized", Message: "User not authenticated"}))
+		return
+	}
+
+	var req ConfirmVerificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "validation_failed", Message: err.Error()}))
+		return
+	}
+
+	if err := h.verificationSvc.ConfirmEmail(c.Request.Context(), userID.(uuid.UUID), req.Value, req.Token); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "verification_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) RequestPhoneVerification(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{Code: "unauthorized", Message: "User not authenticated"}))
+		return
+	}
+
+	var req RequestVerificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "validation_failed", Message: err.Error()}))
+		return
+	}
+
+	if err := h.verificationSvc.RequestPhoneVerification(c.Request.Context(), userID.(uuid.UUID), req.Value); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "verification_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ConfirmPhone(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{Code: "unauthorized", Message: "User not authenticated"}))
+		return
+	}
+
+	var req ConfirmVerificationRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "validation_failed", Message: err.Error()}))
+		return
+	}
+
+	if err := h.verificationSvc.ConfirmPhone(c.Request.Context(), userID.(uuid.UUID), req.Value, req.Token); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "verification_failed", Message: err.Error()}))
 		return
 	}
 
