@@ -18,12 +18,12 @@ import (
 )
 
 type UserHandler struct {
-	svc          identity.IdentityService
-	store        stores.UserStore
-	sessionStore stores.UserSessionStore
-	apiKeySvc    identity.APIKeyService
-	passkeySvc   identity.PasskeyService
-	mfaSvc       identity.MfaService
+	svc             identity.IdentityService
+	store           stores.UserStore
+	sessionStore    stores.UserSessionStore
+	apiKeySvc       identity.APIKeyService
+	passkeySvc      identity.PasskeyService
+	mfaSvc          identity.MfaService
 	verificationSvc identity.VerificationService
 	importExportSvc identity.ImportExportService
 }
@@ -45,7 +45,6 @@ func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store 
 	meGroup.GET("/api-keys", h.ListMyAPIKeys)
 	meGroup.POST("/api-keys", h.CreateMyAPIKey)
 	meGroup.DELETE("/api-keys/:keyId", h.DeleteMyAPIKey)
-
 
 	// Verification Management
 	meGroup.POST("/email/verify", h.RequestEmailVerification)
@@ -160,8 +159,8 @@ func (h *UserHandler) ListUsers(c *gin.Context) {
 	// Simple list options from query params
 	// TODO: fully parse options
 	opts := core.ListOptions{
-		Page:     1,
-		PageSize: 50,
+		Offset: 0,
+		Limit:  50,
 	}
 
 	result, err := h.store.List(c.Request.Context(), opts)
@@ -873,7 +872,7 @@ func (h *UserHandler) ImportUsers(c *gin.Context) {
 	if format == "" {
 		format = "json"
 	}
-	
+
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_body", Message: err.Error()}))

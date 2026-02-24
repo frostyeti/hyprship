@@ -14,24 +14,24 @@ type ApiErrorDetail struct {
 	Target  string  `json:"target,omitempty"`
 }
 
-type Response struct {
+type Response[T any] struct {
 	Ok       bool      `json:"ok"`
 	Error    *ApiError `json:"error,omitempty"`
 	TraceId  *string   `json:"traceId,omitempty"`
 	SpanId   *string   `json:"spanId,omitempty"`
-	Value    any       `json:"value,omitempty"`
+	Value    T         `json:"value,omitempty"`
 	NextLink *string   `json:"@nextLink,omitempty"`
 }
 
-func SuccessResponse(value any) Response {
-	return Response{
+func SuccessResponse[T any](value T) Response[T] {
+	return Response[T]{
 		Ok:    true,
 		Value: value,
 	}
 }
 
-func ErrorResponse(err *ApiError) Response {
-	return Response{
+func ErrorResponse(err *ApiError) Response[any] {
+	return Response[any]{
 		Ok:    false,
 		Error: err,
 	}

@@ -101,9 +101,9 @@ func (s *UserEmailStore) Create(ctx context.Context, email *models.UserEmail) er
 	if email.CreatedAt.IsZero() {
 		email.CreatedAt = now
 	}
-    if email.ID == uuid.Nil {
-        email.ID = uuid.New()
-    }
+	if email.ID == uuid.Nil {
+		email.ID = uuid.New()
+	}
 
 	query := `
 		INSERT INTO users_emails (id, user_id, email, email_upcase, email_upcase_digest, is_active, is_verified, is_primary, created_at, updated_at)

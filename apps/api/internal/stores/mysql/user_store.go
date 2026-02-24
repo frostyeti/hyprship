@@ -21,29 +21,18 @@ func NewUserStore(db *sql.DB) *UserStore {
 }
 
 func (s *UserStore) List(ctx context.Context, opts core.ListOptions) (core.ListResult[models.User], error) {
-	query := `SELECT id, primary_email, primary_phone, name, image_uri, is_banned, created_at, updated_at FROM users`
-	args := []any{}
-	if opts.Filter != "" {
-		query += ` WHERE name_upcase LIKE ? OR primary_email_upcase LIKE ?`
-		filter := "%" + strings.ToUpper(opts.Filter) + "%"
-		args = append(args, filter, filter)
+	fieldMap := map[string]string{
+		"id":           "id",
+		"primaryEmail": "primary_email_upcase",
+		"name":         "name_upcase",
+		"createdAt":    "created_at",
+		"updatedAt":    "updated_at",
 	}
 
-	if opts.Sort != "" {
-		query += " ORDER BY " + opts.Sort
-		if opts.SortDesc {
-			query += " DESC"
-		}
-	} else {
-		query += " ORDER BY created_at DESC"
-	}
+	baseQuery := `SELECT id, primary_email, primary_phone, name, image_uri, is_banned, created_at, updated_at FROM users`
+	query, args := core.BuildListQuery("mysql", baseQuery, opts, fieldMap)
 
-	if opts.PageSize > 0 {
-		query += " LIMIT ? OFFSET ?"
-		args = append(args, opts.PageSize, (opts.Page-1)*opts.PageSize)
-	}
-
-	rows, err := s.db.QueryContext(ctx, query, args...)
+	rows, err := s.db.QueryContext(ctx, core.Rebind("mysql", query), args...)
 	if err != nil {
 		return core.ListResult[models.User]{}, err
 	}
@@ -52,15 +41,15 @@ func (s *UserStore) List(ctx context.Context, opts core.ListOptions) (core.ListR
 	var items []models.User
 	for rows.Next() {
 		var u models.User
-		var createdAt, updatedAt sql.NullTime
+		var createdAt, updatedAt sql.NullInt64
 		if err := rows.Scan(&u.ID, &u.PrimaryEmail, &u.PrimaryPhone, &u.Name, &u.ImageURI, &u.IsBanned, &createdAt, &updatedAt); err != nil {
 			return core.ListResult[models.User]{}, err
 		}
 		if createdAt.Valid {
-			u.CreatedAt = createdAt.Time
+			u.CreatedAt = time.Unix(createdAt.Int64, 0)
 		}
 		if updatedAt.Valid {
-			t := updatedAt.Time
+			t := time.Unix(updatedAt.Int64, 0)
 			u.UpdatedAt = &t
 		}
 		items = append(items, u)
@@ -68,17 +57,13 @@ func (s *UserStore) List(ctx context.Context, opts core.ListOptions) (core.ListR
 
 	var total int64
 	countQuery := `SELECT COUNT(*) FROM users`
-	countArgs := []any{}
-	if opts.Filter != "" {
-		countQuery += ` WHERE name_upcase LIKE ? OR primary_email_upcase LIKE ?`
-		countArgs = args[:2]
-	}
-	err = s.db.QueryRowContext(ctx, countQuery, countArgs...).Scan(&total)
+	countQuery, countArgs := core.BuildListQuery("mysql", countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
+	err = s.db.QueryRowContext(ctx, core.Rebind("mysql", countQuery), countArgs...).Scan(&total)
 	if err != nil {
 		return core.ListResult[models.User]{}, err
 	}
 
-	return core.ListResult[models.User]{Items: items, Total: total}, nil
+	return core.ListResult[models.User]{Items: items, TotalCount: int(total)}, nil
 }
 
 func (s *UserStore) Get(ctx context.Context, id uuid.UUID) (*models.User, error) {
@@ -199,43 +184,4 @@ func (s *UserStore) AddClaim(ctx context.Context, claim *models.UserClaim) error
 func (s *UserStore) RemoveClaim(ctx context.Context, claimID int32) error {
 	_, err := s.db.ExecContext(ctx, `DELETE FROM user_claims WHERE id = ?`, claimID)
 	return err
-}
-
-func (s *UserStore) Export(opts core.ListOptions) ([]models.User, error) {
-	res, err := s.List(context.Background(), opts)
-	return res.Items, err
-}
-
-func (s *UserStore) Import(items []models.User) error {
-	tx, err := s.db.BeginTx(context.Background(), nil)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = tx.Rollback() }()
-
-	query := `INSERT INTO users (id, primary_email, primary_email_upcase, primary_phone, name, name_upcase, image_uri, is_banned, created_at, updated_at) 
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	stmt, err := tx.Prepare(query)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	for _, user := range items {
-		emailUpcase, nameUpcase := "", ""
-		if user.PrimaryEmail != nil {
-			emailUpcase = strings.ToUpper(*user.PrimaryEmail)
-			user.PrimaryEmailUpcase = &emailUpcase
-		}
-		if user.Name != nil {
-			nameUpcase = strings.ToUpper(*user.Name)
-			user.NameUpcase = &nameUpcase
-		}
-
-		_, err := stmt.Exec(user.ID, user.PrimaryEmail, user.PrimaryEmailUpcase, user.PrimaryPhone, user.Name, user.NameUpcase, user.ImageURI, user.IsBanned, user.CreatedAt, user.UpdatedAt)
-		if err != nil {
-			return err
-		}
-	}
-	return tx.Commit()
 }

@@ -21,10 +21,6 @@ type UserStore interface {
 	ListClaims(ctx context.Context, userID uuid.UUID) ([]models.UserClaim, error)
 	AddClaim(ctx context.Context, claim *models.UserClaim) error
 	RemoveClaim(ctx context.Context, claimID int32) error
-
-	// Importer/Exporter implementations
-	core.Exporter[models.User]
-	core.Importer[models.User]
 }
 
 type UserPasswordAuthStore interface {
@@ -62,8 +58,4 @@ type RoleStore interface {
 	ListClaims(ctx context.Context, roleID uuid.UUID) ([]models.RoleClaim, error)
 	AddClaim(ctx context.Context, claim *models.RoleClaim) error
 	RemoveClaim(ctx context.Context, claimID int32) error
-
-	// Importer/Exporter implementations
-	core.Exporter[models.Role]
-	core.Importer[models.Role]
 }

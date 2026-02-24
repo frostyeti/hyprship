@@ -99,7 +99,6 @@ func main() {
 	verificationSvc := identity.NewVerificationService(storeFactory.UserEmailStore, storeFactory.UserPhoneStore, storeFactory.UserPasswordAuthStore)
 	importExportSvc := identity.NewImportExportService(storeFactory.UserStore, storeFactory.RoleStore)
 
-
 	v1.RegisterRoutes(apiV1, identitySvc, storeFactory.UserStore, storeFactory.RoleStore, storeFactory.UserSessionStore, apiKeySvc, passkeySvc, mfaSvc, verificationSvc, importExportSvc)
 
 	addr := cfg.Addr

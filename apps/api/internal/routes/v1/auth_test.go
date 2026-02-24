@@ -95,7 +95,7 @@ func TestAuthLogin(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)
@@ -128,7 +128,7 @@ func TestAuthLogout(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)

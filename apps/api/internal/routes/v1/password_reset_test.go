@@ -39,7 +39,7 @@ func TestForgotPassword(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)
@@ -75,7 +75,7 @@ func TestResetPassword_Success(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)
@@ -108,7 +108,7 @@ func TestResetPassword_Failure(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.False(t, response.Ok)
