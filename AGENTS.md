@@ -35,7 +35,7 @@ apps/                              # the directory where the application is stor
     main.go                        # main go file for backendapi
 
 
-  hsctl/                           # hyprship ctl util. calls api and other utilities
+  hs/                              # hyprship cli util. calls api and other utilities
     cmd/                           # commands
       users.go                     # subcommands(s) for user
     main.go                        # main entry point

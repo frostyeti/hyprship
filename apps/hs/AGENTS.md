@@ -1,6 +1,29 @@
-# AGENTS - api
+# AGENTS - hs
 
-## ✅ ALWAYS DO
+The hsctl is the hyprship control command line app for managing the
+the hypership-api.
+
+TUI capabilities may be added using charm or other go modules.
+
+hsctl should enable commands that mirror routes and capabilities of the
+`api` project.  
+
+It should also be able to generate the hashed value of a password
+or api key for the app for the purposes putting that value into
+sql directly.
+
+The cli may add additional flags and commands to make it easier to upload/download files, edit files, bulk upload, etc.
+
+Commands and their associated apis that are implementet **MUST** be tracked in the `apps/hs/docs/commands.md` file after they have been
+implemented.
+
+## ✅ ALWAYS
+
+## Configuration
+
+Enable yaml, toml, environment variables, and read environment values using `github.com/frostyeti/go/dotenv` module.  Use the viper module.
+
+For yaml and toml files may be in the current directory, in the user's config hs config folder e.g. ~/hyprship/hs.yaml, or in the os config folder c:\ProgramData\hyprship\hs.yaml or /etc/hypership/hs.toml.
 
 ### MISE
 
@@ -47,6 +70,13 @@ the current task.
 **Always** fix
 broken tests before finishing the current task.
 
+Primarily write integration tests for the hs app that spins up
+the API project using testcontainers and postgres and then
+run code against the api.
+
+For e2e tests make exec calls using github.com/frostyeti/go/exec
+that call the cli after testcontainers and postgres are spun up.
+
 When writing & running tests:
 
 - Use **mise** and **cast** to run tests. e.g. `mise exec cast test:unit`
@@ -59,17 +89,10 @@ When writing & running tests:
 - Use testcontainers for go for integration tests for services like
   databases, redis, search, open telemetry recievers, etc.
 
-### Database Design
+## Commands
 
-- Use the skill **db-common-type-system** when working with database schema.
-- Use the db common type system when generating a plan.
-- Translate the db common type system to the correct db driver type when implemeting the plan.
-- Provide the user with recommendations for the db schema design.
-- Provide the user with recommendations for updates to the db-common-type-system skill as needed.
-- Provide the user with recommendations for missing indexes and constraints.
-- Follow the field name conventions found in the db-common-type-system.
-- Write integrations tests against the db implementation for go.
-- With the exception of sqlite, use testcontainers for writing db integration tests.
+- Write commands using the cobra module.
+- Store, write, get configuration values using viper.
 
 ## ⚠️ ASK FIRST
 
