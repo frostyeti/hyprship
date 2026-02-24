@@ -48,7 +48,7 @@ func setupAPIKeysRouter(mockSvc *MockAPIKeyService) *gin.Engine {
 	r := gin.Default()
 
 	usersGroup := r.Group("/api/v1/users")
-	RegisterUserRoutes(usersGroup, nil, nil, nil, mockSvc, nil, nil, nil)
+	RegisterUserRoutes(usersGroup, nil, nil, nil, mockSvc, nil, nil, nil, nil)
 	return r
 }
 
