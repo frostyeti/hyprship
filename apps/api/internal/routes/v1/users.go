@@ -14,18 +14,23 @@ import (
 )
 
 type UserHandler struct {
-	svc   identity.IdentityService
-	store stores.UserStore
+	svc          identity.IdentityService
+	store        stores.UserStore
+	sessionStore stores.UserSessionStore
 }
 
-func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.UserStore) {
-	h := &UserHandler{svc: svc, store: store}
+func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store stores.UserStore, sessionStore stores.UserSessionStore) {
+	h := &UserHandler{svc: svc, store: store, sessionStore: sessionStore}
 
 	// Unauthenticated / Self Routes (Require auth, but not necessarily admin roles)
 	meGroup := r.Group("/me")
 	meGroup.Use(middleware.RequireAuth())
 	meGroup.GET("", h.GetMe)
 	meGroup.PUT("", h.UpdateMe)
+
+	// Self Session Management
+	meGroup.GET("/sessions", h.ListMySessions)
+	meGroup.DELETE("/sessions/:sessionId", h.DeleteMySession)
 
 	// Administrative Routes (Should require users:read or users:write)
 	adminGroup := r.Group("")
@@ -256,6 +261,69 @@ func (h *UserHandler) DeleteUser(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{
 			Code:    "delete_failed",
 			Message: err.Error(),
+		}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ListMySessions(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{
+			Code:    "unauthorized",
+			Message: "User not authenticated",
+		}))
+		return
+	}
+
+	sessions, err := h.sessionStore.ListByUser(c.Request.Context(), userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{
+			Code:    "list_failed",
+			Message: "Failed to list sessions",
+		}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse(sessions))
+}
+
+func (h *UserHandler) DeleteMySession(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{
+			Code:    "unauthorized",
+			Message: "User not authenticated",
+		}))
+		return
+	}
+
+	sessionIDStr := c.Param("sessionId")
+	sessionID, err := uuid.Parse(sessionIDStr)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{
+			Code:    "invalid_id",
+			Message: "Invalid UUID format",
+		}))
+		return
+	}
+
+	// Verify the session actually belongs to this user before deleting
+	session, err := h.sessionStore.Get(c.Request.Context(), sessionID)
+	if err != nil || session.UserID != userID.(uuid.UUID) {
+		c.JSON(http.StatusNotFound, routes.ErrorResponse(&routes.ApiError{
+			Code:    "not_found",
+			Message: "Session not found",
+		}))
+		return
+	}
+
+	if err := h.svc.Logout(c.Request.Context(), sessionID); err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{
+			Code:    "delete_failed",
+			Message: "Failed to revoke session",
 		}))
 		return
 	}

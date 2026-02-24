@@ -66,7 +66,7 @@ func TestGetMe_Success(t *testing.T) {
 		},
 	}
 
-	RegisterUserRoutes(r.Group("/api/v1/users"), nil, mockStore)
+	RegisterUserRoutes(r.Group("/api/v1/users"), nil, mockStore, nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/users/me", nil)
@@ -90,7 +90,7 @@ func TestGetMe_Unauthorized(t *testing.T) {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 
-	RegisterUserRoutes(r.Group("/api/v1/users"), nil, &MockUserStore{})
+	RegisterUserRoutes(r.Group("/api/v1/users"), nil, &MockUserStore{}, nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/api/v1/users/me", nil)
