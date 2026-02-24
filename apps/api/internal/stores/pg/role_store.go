@@ -20,29 +20,15 @@ func NewRoleStore(db *sql.DB) *RoleStore {
 }
 
 func (s *RoleStore) List(ctx context.Context, opts core.ListOptions) (core.ListResult[models.Role], error) {
-	query := `SELECT id, name, description FROM roles`
-	args := []any{}
-	if opts.Filter != "" {
-		query += ` WHERE name_upcase LIKE ?`
-		filter := "%" + strings.ToUpper(opts.Filter) + "%"
-		args = append(args, filter)
+	fieldMap := map[string]string{
+		"id":   "id",
+		"name": "name",
 	}
 
-	if opts.Sort != "" {
-		query += " ORDER BY " + opts.Sort
-		if opts.SortDesc {
-			query += " DESC"
-		}
-	} else {
-		query += " ORDER BY name_upcase ASC"
-	}
+	baseQuery := `SELECT id, name, description FROM roles`
+	query, args := core.BuildListQuery("postgres", baseQuery, opts, fieldMap)
 
-	if opts.PageSize > 0 {
-		query += " LIMIT ? OFFSET ?"
-		args = append(args, opts.PageSize, (opts.Page-1)*opts.PageSize)
-	}
-
-	rows, err := s.db.QueryContext(ctx, core.Rebind("pg", query), args...)
+	rows, err := s.db.QueryContext(ctx, core.Rebind("postgres", query), args...)
 	if err != nil {
 		return core.ListResult[models.Role]{}, err
 	}
@@ -59,17 +45,13 @@ func (s *RoleStore) List(ctx context.Context, opts core.ListOptions) (core.ListR
 
 	var total int64
 	countQuery := `SELECT COUNT(*) FROM roles`
-	countArgs := []any{}
-	if opts.Filter != "" {
-		countQuery += ` WHERE name_upcase LIKE ?`
-		countArgs = args[:1]
-	}
-	err = s.db.QueryRowContext(ctx, core.Rebind("pg", countQuery), countArgs...).Scan(&total)
+	countQuery, countArgs := core.BuildListQuery("postgres", countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
+	err = s.db.QueryRowContext(ctx, core.Rebind("postgres", countQuery), countArgs...).Scan(&total)
 	if err != nil {
 		return core.ListResult[models.Role]{}, err
 	}
 
-	return core.ListResult[models.Role]{Items: items, Total: total}, nil
+	return core.ListResult[models.Role]{Items: items, TotalCount: int(total)}, nil
 }
 
 func (s *RoleStore) Get(ctx context.Context, id uuid.UUID) (*models.Role, error) {
@@ -131,33 +113,4 @@ func (s *RoleStore) AddClaim(ctx context.Context, claim *models.RoleClaim) error
 func (s *RoleStore) RemoveClaim(ctx context.Context, claimID int32) error {
 	_, err := s.db.ExecContext(ctx, core.Rebind("pg", `DELETE FROM role_claims WHERE id = ?`), claimID)
 	return err
-}
-
-func (s *RoleStore) Export(opts core.ListOptions) ([]models.Role, error) {
-	res, err := s.List(context.Background(), opts)
-	return res.Items, err
-}
-
-func (s *RoleStore) Import(items []models.Role) error {
-	tx, err := s.db.BeginTx(context.Background(), nil)
-	if err != nil {
-		return err
-	}
-	defer func() { _ = tx.Rollback() }()
-
-	query := `INSERT INTO roles (id, name, name_upcase, description) VALUES (?, ?, ?, ?)`
-	stmt, err := tx.Prepare(core.Rebind("pg", query))
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	for _, role := range items {
-		role.NameUpcase = strings.ToUpper(role.Name)
-		_, err := stmt.Exec(role.ID, role.Name, role.NameUpcase, role.Description)
-		if err != nil {
-			return err
-		}
-	}
-	return tx.Commit()
 }

@@ -78,7 +78,7 @@ func TestListMyAPIKeys(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)
@@ -123,7 +123,7 @@ func TestCreateMyAPIKey(t *testing.T) {
 
 	assert.Equal(t, http.StatusCreated, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)
@@ -155,7 +155,7 @@ func TestDeleteMyAPIKey(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var response routes.Response
+	var response routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &response)
 	assert.NoError(t, err)
 	assert.True(t, response.Ok)

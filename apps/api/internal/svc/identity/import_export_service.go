@@ -44,7 +44,7 @@ func NewImportExportService(userStore stores.UserStore, roleStore stores.RoleSto
 
 // User Export
 func (s *importExportService) ExportUsers(ctx context.Context, format string) ([]byte, error) {
-	opts := core.ListOptions{PageSize: 10000}
+	opts := core.ListOptions{Limit: 10000}
 	res, err := s.userStore.List(ctx, opts)
 	if err != nil {
 		return nil, err
@@ -224,7 +224,7 @@ func (s *importExportService) parseUsersCSV(records [][]string) ([]models.User, 
 
 // Role Export
 func (s *importExportService) ExportRoles(ctx context.Context, format string) ([]byte, error) {
-	opts := core.ListOptions{PageSize: 10000}
+	opts := core.ListOptions{Limit: 10000}
 	res, err := s.roleStore.List(ctx, opts)
 	if err != nil {
 		return nil, err

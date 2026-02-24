@@ -40,8 +40,8 @@ func RegisterRoleRoutes(r *gin.RouterGroup, svc identity.IdentityService, store 
 
 func (h *RoleHandler) ListRoles(c *gin.Context) {
 	opts := core.ListOptions{
-		Page:     1,
-		PageSize: 50,
+		Offset: 0,
+		Limit:  50,
 	}
 
 	result, err := h.store.List(c.Request.Context(), opts)
@@ -257,7 +257,7 @@ func (h *RoleHandler) ImportRoles(c *gin.Context) {
 	if format == "" {
 		format = "json"
 	}
-	
+
 	data, err := io.ReadAll(c.Request.Body)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_body", Message: err.Error()}))

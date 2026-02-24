@@ -101,9 +101,9 @@ func (s *UserPhoneStore) Create(ctx context.Context, phone *models.UserPhone) er
 	if phone.CreatedAt.IsZero() {
 		phone.CreatedAt = now
 	}
-    if phone.ID == uuid.Nil {
-        phone.ID = uuid.New()
-    }
+	if phone.ID == uuid.Nil {
+		phone.ID = uuid.New()
+	}
 
 	query := `
 		INSERT INTO users_phones (id, user_id, phone, phone_digest, is_active, is_verified, is_primary, created_at, updated_at)
