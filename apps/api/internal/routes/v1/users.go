@@ -3,6 +3,7 @@ package v1
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/frostyeti/hyprship/apps/api/internal/core"
 	"github.com/frostyeti/hyprship/apps/api/internal/middleware"
@@ -35,6 +36,11 @@ func RegisterUserRoutes(r *gin.RouterGroup, svc identity.IdentityService, store 
 	// Self Session Management
 	meGroup.GET("/sessions", h.ListMySessions)
 	meGroup.DELETE("/sessions/:sessionId", h.DeleteMySession)
+
+	// Self API Keys Management
+	meGroup.GET("/api-keys", h.ListMyAPIKeys)
+	meGroup.POST("/api-keys", h.CreateMyAPIKey)
+	meGroup.DELETE("/api-keys/:keyId", h.DeleteMyAPIKey)
 
 	// MFA Management
 	meGroup.POST("/mfa/setup", h.SetupMfa)
@@ -405,6 +411,75 @@ func (h *UserHandler) DeleteMySession(c *gin.Context) {
 			Code:    "delete_failed",
 			Message: "Failed to revoke session",
 		}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+func (h *UserHandler) ListMyAPIKeys(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{Code: "unauthorized", Message: "User not authenticated"}))
+		return
+	}
+
+	keys, err := h.apiKeySvc.ListAPIKeys(c.Request.Context(), userID.(uuid.UUID))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "list_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse(keys))
+}
+
+type CreateAPIKeyRequest struct {
+	Name      string     `json:"name" binding:"required"`
+	Comment   *string    `json:"comment,omitempty"`
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+}
+
+func (h *UserHandler) CreateMyAPIKey(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{Code: "unauthorized", Message: "User not authenticated"}))
+		return
+	}
+
+	var req CreateAPIKeyRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "validation_failed", Message: err.Error()}))
+		return
+	}
+
+	key, rawKey, err := h.apiKeySvc.CreateAPIKey(c.Request.Context(), userID.(uuid.UUID), req.Name, req.Comment, req.ExpiresAt)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "create_failed", Message: err.Error()}))
+		return
+	}
+
+	c.JSON(http.StatusCreated, routes.SuccessResponse(map[string]any{
+		"apiKey": key,
+		"secret": rawKey,
+	}))
+}
+
+func (h *UserHandler) DeleteMyAPIKey(c *gin.Context) {
+	userID, exists := c.Get(middleware.UserIDKey)
+	if !exists {
+		c.JSON(http.StatusUnauthorized, routes.ErrorResponse(&routes.ApiError{Code: "unauthorized", Message: "User not authenticated"}))
+		return
+	}
+
+	keyIDStr := c.Param("keyId")
+	keyID, err := strconv.ParseInt(keyIDStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{Code: "invalid_parameter", Message: "Invalid key ID"}))
+		return
+	}
+
+	if err := h.apiKeySvc.RevokeAPIKey(c.Request.Context(), userID.(uuid.UUID), int32(keyID)); err != nil {
+		c.JSON(http.StatusInternalServerError, routes.ErrorResponse(&routes.ApiError{Code: "delete_failed", Message: err.Error()}))
 		return
 	}
 
