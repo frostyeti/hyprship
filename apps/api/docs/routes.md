@@ -6,9 +6,12 @@
 - `POST /logout` - Logout a user by invalidating the active session.
 - `POST /forgot-password` - Request a password reset link.
 - `POST /reset-password` - Reset a password using the secure OTP token.
+- `POST /forgot-email` - Request a forgotten email retrieval SMS.
 
 ## Users (`/api/v1/users`)
 
+- `GET /me` - Get current authenticated user profile.
+- `PUT /me` - Update current authenticated user profile.
 - `GET /` - List users.
 - `GET /{id}` - Get user by ID.
 - `POST /` - Create a new user.

@@ -21,6 +21,7 @@ func RegisterAuthRoutes(r *gin.RouterGroup, svc identity.IdentityService) {
 	r.POST("/logout", h.Logout)
 	r.POST("/forgot-password", h.ForgotPassword)
 	r.POST("/reset-password", h.ResetPassword)
+	r.POST("/forgot-email", h.ForgotEmail)
 }
 
 type LoginRequest struct {
@@ -85,6 +86,26 @@ func (h *AuthHandler) Logout(c *gin.Context) {
 		}))
 		return
 	}
+
+	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
+}
+
+type ForgotEmailRequest struct {
+	Phone string `json:"phone" binding:"required"`
+}
+
+func (h *AuthHandler) ForgotEmail(c *gin.Context) {
+	var req ForgotEmailRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, routes.ErrorResponse(&routes.ApiError{
+			Code:    "validation_failed",
+			Message: err.Error(),
+		}))
+		return
+	}
+
+	// TODO: implement service logic to send SMS with email
+	// h.svc.ForgotEmail(c.Request.Context(), req.Phone)
 
 	c.JSON(http.StatusOK, routes.SuccessResponse("ok"))
 }
