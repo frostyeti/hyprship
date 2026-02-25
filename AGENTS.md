@@ -18,7 +18,8 @@ and manage infra.
   - Scopes: Indicate project component e.g. `feat(api)`, `fix(ui)`
   - Link GitHub issues in the description or footer (e.g. `#1`, `Resolves #1`, `Fixes #1`)
 - Use **Bun** or **Deno** for scripts instead of Python (as they are easier to install and Windows doesn't include Python).
-- Store all scripts in the `eng/scripts/` folder.
+- Store all scripts in the `eng/scripts/` folder. Re-usable scripts should always go into `eng/scripts`.
+- Scripts should NEVER go in the root directory unless explicitly requested by the user. Temporary scripts should go into `eng/tmp/`.
 - When creating binaries or executables, place them in `eng/bin/`. For cross-platform support, always write `<script>.cmd` and `<script>.ps1` wrappers for Windows.
   
 

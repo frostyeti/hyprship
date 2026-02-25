@@ -1,2 +1,4 @@
 bin/**
 apps/**/bin/**
+*.test
+eng/tmp/
