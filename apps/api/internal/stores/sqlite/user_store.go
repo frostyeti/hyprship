@@ -57,7 +57,7 @@ func (s *UserStore) List(ctx context.Context, opts core.ListOptions) (core.ListR
 
 	var total int64
 	countQuery := `SELECT COUNT(*) FROM users`
-	countQuery, countArgs := core.BuildListQuery("sqlite3", countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
+	countQuery, countArgs := core.BuildCountQuery(countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
 	err = s.db.QueryRowContext(ctx, core.Rebind("sqlite3", countQuery), countArgs...).Scan(&total)
 	if err != nil {
 		return core.ListResult[models.User]{}, err

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS user_totp;
+
 CREATE TABLE user_totps (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,

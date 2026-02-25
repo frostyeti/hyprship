@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS user_api_keys_roles;
+DROP TABLE IF EXISTS user_api_keys;
+DROP TABLE IF EXISTS user_passkey;
+
 CREATE TABLE user_api_keys (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,

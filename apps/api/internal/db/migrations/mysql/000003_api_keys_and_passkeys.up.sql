@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS user_api_keys_roles;
+DROP TABLE IF EXISTS user_api_keys;
+DROP TABLE IF EXISTS user_passkey;
+
 CREATE TABLE user_api_keys (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id CHAR(36) NOT NULL,

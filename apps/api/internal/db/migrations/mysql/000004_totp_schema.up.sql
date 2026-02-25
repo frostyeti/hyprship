@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS user_totp;
+
 CREATE TABLE user_totps (
     id CHAR(36) PRIMARY KEY,
     user_id CHAR(36) NOT NULL UNIQUE,
