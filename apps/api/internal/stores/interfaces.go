@@ -71,6 +71,7 @@ type GroupStore interface {
 	AddUser(ctx context.Context, groupID, userID uuid.UUID) error
 	RemoveUser(ctx context.Context, groupID, userID uuid.UUID) error
 	ListUsers(ctx context.Context, groupID uuid.UUID) ([]models.GroupUser, error)
+	ListGroupsByUserID(ctx context.Context, userID uuid.UUID) ([]models.GroupUser, error)
 
 	AddAdmin(ctx context.Context, groupID, userID uuid.UUID) error
 	RemoveAdmin(ctx context.Context, groupID, userID uuid.UUID) error

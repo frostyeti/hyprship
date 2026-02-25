@@ -187,6 +187,25 @@ func (s *GroupStore) ListUsers(ctx context.Context, groupID uuid.UUID) ([]models
 	return items, nil
 }
 
+func (s *GroupStore) ListGroupsByUserID(ctx context.Context, userID uuid.UUID) ([]models.GroupUser, error) {
+	query := `SELECT CAST(group_id AS CHAR(36)), CAST(user_id AS CHAR(36)) FROM groups_users WHERE user_id = ?`
+	rows, err := s.db.QueryContext(ctx, core.Rebind("mssql", query), userID.String())
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var items []models.GroupUser
+	for rows.Next() {
+		var gu models.GroupUser
+		if err := rows.Scan(&gu.GroupID, &gu.UserID); err != nil {
+			return nil, err
+		}
+		items = append(items, gu)
+	}
+	return items, nil
+}
+
 func (s *GroupStore) AddAdmin(ctx context.Context, groupID, userID uuid.UUID) error {
 	query := `INSERT INTO groups_admins (group_id, user_id) VALUES (?, ?)`
 	_, err := s.db.ExecContext(ctx, core.Rebind("mssql", query), groupID.String(), userID.String())

@@ -24,15 +24,16 @@ type MockGroupStore struct {
 	UpdateFunc    func(ctx context.Context, group *models.Group) error
 	DeleteFunc    func(ctx context.Context, id uuid.UUID) error
 
-	AddUserFunc     func(ctx context.Context, groupID, userID uuid.UUID) error
-	RemoveUserFunc  func(ctx context.Context, groupID, userID uuid.UUID) error
-	ListUsersFunc   func(ctx context.Context, groupID uuid.UUID) ([]models.GroupUser, error)
-	AddAdminFunc    func(ctx context.Context, groupID, userID uuid.UUID) error
-	RemoveAdminFunc func(ctx context.Context, groupID, userID uuid.UUID) error
-	ListAdminsFunc  func(ctx context.Context, groupID uuid.UUID) ([]models.GroupAdmin, error)
-	AddRoleFunc     func(ctx context.Context, groupID, roleID uuid.UUID) error
-	RemoveRoleFunc  func(ctx context.Context, groupID, roleID uuid.UUID) error
-	ListRolesFunc   func(ctx context.Context, groupID uuid.UUID) ([]models.GroupRole, error)
+	AddUserFunc            func(ctx context.Context, groupID, userID uuid.UUID) error
+	RemoveUserFunc         func(ctx context.Context, groupID, userID uuid.UUID) error
+	ListUsersFunc          func(ctx context.Context, groupID uuid.UUID) ([]models.GroupUser, error)
+	ListGroupsByUserIDFunc func(ctx context.Context, userID uuid.UUID) ([]models.GroupUser, error)
+	AddAdminFunc           func(ctx context.Context, groupID, userID uuid.UUID) error
+	RemoveAdminFunc        func(ctx context.Context, groupID, userID uuid.UUID) error
+	ListAdminsFunc         func(ctx context.Context, groupID uuid.UUID) ([]models.GroupAdmin, error)
+	AddRoleFunc            func(ctx context.Context, groupID, roleID uuid.UUID) error
+	RemoveRoleFunc         func(ctx context.Context, groupID, roleID uuid.UUID) error
+	ListRolesFunc          func(ctx context.Context, groupID uuid.UUID) ([]models.GroupRole, error)
 }
 
 func (m *MockGroupStore) List(ctx context.Context, opts core.ListOptions) (core.ListResult[models.Group], error) {
@@ -89,6 +90,13 @@ func (m *MockGroupStore) RemoveUser(ctx context.Context, groupID, userID uuid.UU
 func (m *MockGroupStore) ListUsers(ctx context.Context, groupID uuid.UUID) ([]models.GroupUser, error) {
 	if m.ListUsersFunc != nil {
 		return m.ListUsersFunc(ctx, groupID)
+	}
+	return nil, nil
+}
+
+func (m *MockGroupStore) ListGroupsByUserID(ctx context.Context, userID uuid.UUID) ([]models.GroupUser, error) {
+	if m.ListGroupsByUserIDFunc != nil {
+		return m.ListGroupsByUserIDFunc(ctx, userID)
 	}
 	return nil, nil
 }

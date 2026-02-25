@@ -169,22 +169,41 @@ func (s *GroupStore) RemoveUser(ctx context.Context, groupID, userID uuid.UUID) 
 }
 
 func (s *GroupStore) ListUsers(ctx context.Context, groupID uuid.UUID) ([]models.GroupUser, error) {
-	query := `SELECT group_id, user_id FROM groups_users WHERE group_id = ?`
-	rows, err := s.db.QueryContext(ctx, core.Rebind("postgres", query), groupID)
+	query := `SELECT group_id, user_id FROM groups_users WHERE group_id = $1`
+	rows, err := s.db.QueryContext(ctx, query, groupID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var items []models.GroupUser
+	var users []models.GroupUser
 	for rows.Next() {
 		var gu models.GroupUser
 		if err := rows.Scan(&gu.GroupID, &gu.UserID); err != nil {
 			return nil, err
 		}
-		items = append(items, gu)
+		users = append(users, gu)
 	}
-	return items, nil
+	return users, rows.Err()
+}
+
+func (s *GroupStore) ListGroupsByUserID(ctx context.Context, userID uuid.UUID) ([]models.GroupUser, error) {
+	query := `SELECT group_id, user_id FROM groups_users WHERE user_id = $1`
+	rows, err := s.db.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.GroupUser
+	for rows.Next() {
+		var gu models.GroupUser
+		if err := rows.Scan(&gu.GroupID, &gu.UserID); err != nil {
+			return nil, err
+		}
+		users = append(users, gu)
+	}
+	return users, rows.Err()
 }
 
 func (s *GroupStore) AddAdmin(ctx context.Context, groupID, userID uuid.UUID) error {
