@@ -60,9 +60,9 @@ func runStoreSuite(t *testing.T, userStore stores.UserStore, roleStore stores.Ro
 	assert.Equal(t, user.ID, u2.ID)
 
 	// List users
-	res, err := userStore.List(ctx, core.ListOptions{Filter: "test"})
+	res, err := userStore.List(ctx, core.ListOptions{Filter: []core.FilterOption{{Field: "name", Operator: "like", Value: "%TEST%"}}})
 	require.NoError(t, err)
-	assert.Equal(t, int64(1), res.Total)
+	assert.Equal(t, 1, res.TotalCount)
 	assert.Len(t, res.Items, 1)
 
 	// User Claims
@@ -102,7 +102,7 @@ func runStoreSuite(t *testing.T, userStore stores.UserStore, roleStore stores.Ro
 
 	roleRes, err := roleStore.List(ctx, core.ListOptions{})
 	require.NoError(t, err)
-	assert.Equal(t, int64(1), roleRes.Total)
+	assert.Equal(t, 1, roleRes.TotalCount)
 
 	err = userStore.Delete(ctx, user.ID)
 	require.NoError(t, err)

@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS user_totp;
+
 CREATE TABLE user_totps (
     id TEXT PRIMARY KEY,
     user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE UNIQUE,

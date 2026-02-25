@@ -41,15 +41,15 @@ func (s *UserStore) List(ctx context.Context, opts core.ListOptions) (core.ListR
 	var items []models.User
 	for rows.Next() {
 		var u models.User
-		var createdAt, updatedAt sql.NullInt64
+		var createdAt, updatedAt sql.NullTime
 		if err := rows.Scan(&u.ID, &u.PrimaryEmail, &u.PrimaryPhone, &u.Name, &u.ImageURI, &u.IsBanned, &createdAt, &updatedAt); err != nil {
 			return core.ListResult[models.User]{}, err
 		}
 		if createdAt.Valid {
-			u.CreatedAt = time.Unix(createdAt.Int64, 0)
+			u.CreatedAt = createdAt.Time
 		}
 		if updatedAt.Valid {
-			t := time.Unix(updatedAt.Int64, 0)
+			t := updatedAt.Time
 			u.UpdatedAt = &t
 		}
 		items = append(items, u)
@@ -57,7 +57,7 @@ func (s *UserStore) List(ctx context.Context, opts core.ListOptions) (core.ListR
 
 	var total int64
 	countQuery := `SELECT COUNT(*) FROM users`
-	countQuery, countArgs := core.BuildListQuery("postgres", countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
+	countQuery, countArgs := core.BuildCountQuery(countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
 	err = s.db.QueryRowContext(ctx, core.Rebind("postgres", countQuery), countArgs...).Scan(&total)
 	if err != nil {
 		return core.ListResult[models.User]{}, err

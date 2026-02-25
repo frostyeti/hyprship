@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS user_api_keys_roles;
+DROP TABLE IF EXISTS user_api_keys;
+DROP TABLE IF EXISTS user_passkey;
+
 CREATE TABLE user_api_keys (
     id SERIAL PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,

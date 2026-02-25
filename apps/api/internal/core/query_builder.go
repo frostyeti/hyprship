@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-// BuildListQuery takes a base query like "SELECT * FROM users" and appends
-// WHERE, ORDER BY, LIMIT, OFFSET clauses based on ListOptions.
+// BuildCountQuery takes a base query like "SELECT COUNT(*) FROM users" and appends
+// WHERE clauses based on ListOptions. It skips ORDER BY, LIMIT, OFFSET.
 // fieldMap allows translating API field names to database column names safely.
-func BuildListQuery(dialect string, baseQuery string, opts ListOptions, fieldMap map[string]string) (string, []any) {
+func BuildCountQuery(baseQuery string, opts ListOptions, fieldMap map[string]string) (string, []any) {
 	var sb strings.Builder
 	sb.WriteString(baseQuery)
 
@@ -51,6 +51,17 @@ func BuildListQuery(dialect string, baseQuery string, opts ListOptions, fieldMap
 		}
 		sb.WriteString(strings.Join(whereClauses, " AND "))
 	}
+
+	return sb.String(), args
+}
+
+// BuildListQuery takes a base query like "SELECT * FROM users" and appends
+// WHERE, ORDER BY, LIMIT, OFFSET clauses based on ListOptions.
+// fieldMap allows translating API field names to database column names safely.
+func BuildListQuery(dialect string, baseQuery string, opts ListOptions, fieldMap map[string]string) (string, []any) {
+	query, args := BuildCountQuery(baseQuery, opts, fieldMap)
+	var sb strings.Builder
+	sb.WriteString(query)
 
 	hasOrder := false
 	if len(opts.Sort) > 0 {

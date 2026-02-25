@@ -45,7 +45,7 @@ func (s *RoleStore) List(ctx context.Context, opts core.ListOptions) (core.ListR
 
 	var total int64
 	countQuery := `SELECT COUNT(*) FROM roles`
-	countQuery, countArgs := core.BuildListQuery("mssql", countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
+	countQuery, countArgs := core.BuildCountQuery(countQuery, core.ListOptions{Filter: opts.Filter}, fieldMap)
 	err = s.db.QueryRowContext(ctx, core.Rebind("mssql", countQuery), countArgs...).Scan(&total)
 	if err != nil {
 		return core.ListResult[models.Role]{}, err
