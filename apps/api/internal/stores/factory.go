@@ -13,6 +13,7 @@ import (
 type StoreFactory struct {
 	UserStore                UserStore
 	RoleStore                RoleStore
+	GroupStore               GroupStore
 	UserPasswordAuthStore    UserPasswordAuthStore
 	UserSessionStore         UserSessionStore
 	UserPasswordHistoryStore UserPasswordHistoryStore
@@ -29,6 +30,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 		return &StoreFactory{
 			UserStore:                sqlite.NewUserStore(db),
 			RoleStore:                sqlite.NewRoleStore(db),
+			GroupStore:               sqlite.NewGroupStore(db),
 			UserPasswordAuthStore:    sqlite.NewUserPasswordAuthStore(db),
 			UserSessionStore:         sqlite.NewUserSessionStore(db),
 			UserPasswordHistoryStore: sqlite.NewUserPasswordHistoryStore(db),
@@ -42,6 +44,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 		return &StoreFactory{
 			UserStore:                pg.NewUserStore(db),
 			RoleStore:                pg.NewRoleStore(db),
+			GroupStore:               pg.NewGroupStore(db),
 			UserPasswordAuthStore:    pg.NewUserPasswordAuthStore(db),
 			UserSessionStore:         pg.NewUserSessionStore(db),
 			UserPasswordHistoryStore: pg.NewUserPasswordHistoryStore(db),
@@ -55,6 +58,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 		return &StoreFactory{
 			UserStore:                mysql.NewUserStore(db),
 			RoleStore:                mysql.NewRoleStore(db),
+			GroupStore:               mysql.NewGroupStore(db),
 			UserPasswordAuthStore:    mysql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mysql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mysql.NewUserPasswordHistoryStore(db),
@@ -68,6 +72,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 		return &StoreFactory{
 			UserStore:                mssql.NewUserStore(db),
 			RoleStore:                mssql.NewRoleStore(db),
+			GroupStore:               mssql.NewGroupStore(db),
 			UserPasswordAuthStore:    mssql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mssql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mssql.NewUserPasswordHistoryStore(db),

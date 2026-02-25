@@ -25,3 +25,11 @@
 - `POST /` - Create a new role.
 - `PUT /{id}` - Update a role by ID.
 - `DELETE /{id}` - Delete a role by ID.
+
+## Groups (`/api/v1/groups`)
+
+- `GET /` - List groups.
+- `GET /{id}` - Get a group by ID.
+- `POST /` - Create a new group.
+- `PUT /{id}` - Update a group by ID.
+- `DELETE /{id}` - Delete a group by ID.
