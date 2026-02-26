@@ -19,7 +19,7 @@ func setupTestServer() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	apiV1 := r.Group("/api/v1")
-	v1.RegisterRoutes(apiV1)
+	v1.RegisterRoutes(apiV1, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	return r
 }
 
@@ -32,7 +32,7 @@ func TestE2E_Ping(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var resp routes.Response
+	var resp routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
 	assert.True(t, resp.Ok)
@@ -59,7 +59,7 @@ func TestE2E_Sample(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 
-	var resp routes.Response
+	var resp routes.Response[any]
 	err := json.Unmarshal(w.Body.Bytes(), &resp)
 	assert.NoError(t, err)
 	assert.True(t, resp.Ok)

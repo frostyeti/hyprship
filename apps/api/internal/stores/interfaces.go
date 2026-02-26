@@ -59,3 +59,42 @@ type RoleStore interface {
 	AddClaim(ctx context.Context, claim *models.RoleClaim) error
 	RemoveClaim(ctx context.Context, claimID int32) error
 }
+<<<<<<< HEAD
+
+type GroupStore interface {
+	List(ctx context.Context, opts core.ListOptions) (core.ListResult[models.Group], error)
+	Get(ctx context.Context, id uuid.UUID) (*models.Group, error)
+	GetByName(ctx context.Context, name string) (*models.Group, error)
+	Create(ctx context.Context, group *models.Group) error
+	Update(ctx context.Context, group *models.Group) error
+	Delete(ctx context.Context, id uuid.UUID) error
+
+	AddUser(ctx context.Context, groupID, userID uuid.UUID) error
+	RemoveUser(ctx context.Context, groupID, userID uuid.UUID) error
+	ListUsers(ctx context.Context, groupID uuid.UUID) ([]models.GroupUser, error)
+	ListGroupsByUserID(ctx context.Context, userID uuid.UUID) ([]models.GroupUser, error)
+
+	AddAdmin(ctx context.Context, groupID, userID uuid.UUID) error
+	RemoveAdmin(ctx context.Context, groupID, userID uuid.UUID) error
+	ListAdmins(ctx context.Context, groupID uuid.UUID) ([]models.GroupAdmin, error)
+
+	AddRole(ctx context.Context, groupID, roleID uuid.UUID) error
+	RemoveRole(ctx context.Context, groupID, roleID uuid.UUID) error
+	ListRoles(ctx context.Context, groupID uuid.UUID) ([]models.GroupRole, error)
+}
+
+type ProjectStore interface {
+	List(ctx context.Context, opts core.ListOptions) (core.ListResult[models.Project], error)
+	Get(ctx context.Context, id uuid.UUID) (*models.Project, error)
+	GetBySlug(ctx context.Context, slug string) (*models.Project, error)
+	Create(ctx context.Context, project *models.Project) error
+	Update(ctx context.Context, project *models.Project) error
+	Delete(ctx context.Context, id uuid.UUID) error
+
+	AddGroup(ctx context.Context, projectID, groupID uuid.UUID, permissions int64) error
+	RemoveGroup(ctx context.Context, projectID, groupID uuid.UUID) error
+	UpdateGroupPermissions(ctx context.Context, projectID, groupID uuid.UUID, permissions int64) error
+	ListGroups(ctx context.Context, projectID uuid.UUID) ([]models.ProjectGroup, error)
+}
+=======
+>>>>>>> origin/master
