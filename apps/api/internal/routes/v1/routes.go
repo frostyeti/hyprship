@@ -10,7 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func RegisterRoutes(r *gin.RouterGroup, identitySvc identity.IdentityService, userStore stores.UserStore, roleStore stores.RoleStore, groupStore stores.GroupStore, sessionStore stores.UserSessionStore, apiKeySvc identity.APIKeyService, passkeySvc identity.PasskeyService, mfaSvc identity.MfaService, verificationSvc identity.VerificationService, importExportSvc identity.ImportExportService) {
+func RegisterRoutes(r *gin.RouterGroup, identitySvc identity.IdentityService, userStore stores.UserStore, roleStore stores.RoleStore, groupStore stores.GroupStore, projectStore stores.ProjectStore, sessionStore stores.UserSessionStore, apiKeySvc identity.APIKeyService, passkeySvc identity.PasskeyService, mfaSvc identity.MfaService, verificationSvc identity.VerificationService, importExportSvc identity.ImportExportService) {
 	r.GET("/ping", Ping)
 	r.GET("/healthz", Healthz)
 	r.GET("/sample", Sample)
@@ -28,6 +28,9 @@ func RegisterRoutes(r *gin.RouterGroup, identitySvc identity.IdentityService, us
 
 	groupsGroup := r.Group("/groups")
 	RegisterGroupRoutes(groupsGroup, groupStore)
+
+	projectsGroup := r.Group("/projects")
+	RegisterProjectRoutes(projectsGroup, projectStore)
 }
 
 func Ping(c *gin.Context) {

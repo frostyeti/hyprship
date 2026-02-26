@@ -81,3 +81,17 @@ type GroupStore interface {
 	RemoveRole(ctx context.Context, groupID, roleID uuid.UUID) error
 	ListRoles(ctx context.Context, groupID uuid.UUID) ([]models.GroupRole, error)
 }
+
+type ProjectStore interface {
+	List(ctx context.Context, opts core.ListOptions) (core.ListResult[models.Project], error)
+	Get(ctx context.Context, id uuid.UUID) (*models.Project, error)
+	GetBySlug(ctx context.Context, slug string) (*models.Project, error)
+	Create(ctx context.Context, project *models.Project) error
+	Update(ctx context.Context, project *models.Project) error
+	Delete(ctx context.Context, id uuid.UUID) error
+
+	AddGroup(ctx context.Context, projectID, groupID uuid.UUID, permissions int64) error
+	RemoveGroup(ctx context.Context, projectID, groupID uuid.UUID) error
+	UpdateGroupPermissions(ctx context.Context, projectID, groupID uuid.UUID, permissions int64) error
+	ListGroups(ctx context.Context, projectID uuid.UUID) ([]models.ProjectGroup, error)
+}

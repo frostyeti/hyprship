@@ -14,6 +14,7 @@ type StoreFactory struct {
 	UserStore                UserStore
 	RoleStore                RoleStore
 	GroupStore               GroupStore
+	ProjectStore             ProjectStore
 	UserPasswordAuthStore    UserPasswordAuthStore
 	UserSessionStore         UserSessionStore
 	UserPasswordHistoryStore UserPasswordHistoryStore
@@ -31,6 +32,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserStore:                sqlite.NewUserStore(db),
 			RoleStore:                sqlite.NewRoleStore(db),
 			GroupStore:               sqlite.NewGroupStore(db),
+			ProjectStore:             sqlite.NewProjectStore(db),
 			UserPasswordAuthStore:    sqlite.NewUserPasswordAuthStore(db),
 			UserSessionStore:         sqlite.NewUserSessionStore(db),
 			UserPasswordHistoryStore: sqlite.NewUserPasswordHistoryStore(db),
@@ -45,6 +47,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserStore:                pg.NewUserStore(db),
 			RoleStore:                pg.NewRoleStore(db),
 			GroupStore:               pg.NewGroupStore(db),
+			ProjectStore:             pg.NewProjectStore(db),
 			UserPasswordAuthStore:    pg.NewUserPasswordAuthStore(db),
 			UserSessionStore:         pg.NewUserSessionStore(db),
 			UserPasswordHistoryStore: pg.NewUserPasswordHistoryStore(db),
@@ -59,6 +62,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserStore:                mysql.NewUserStore(db),
 			RoleStore:                mysql.NewRoleStore(db),
 			GroupStore:               mysql.NewGroupStore(db),
+			ProjectStore:             mysql.NewProjectStore(db),
 			UserPasswordAuthStore:    mysql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mysql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mysql.NewUserPasswordHistoryStore(db),
@@ -73,6 +77,7 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			UserStore:                mssql.NewUserStore(db),
 			RoleStore:                mssql.NewRoleStore(db),
 			GroupStore:               mssql.NewGroupStore(db),
+			ProjectStore:             mssql.NewProjectStore(db),
 			UserPasswordAuthStore:    mssql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mssql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mssql.NewUserPasswordHistoryStore(db),
