@@ -117,8 +117,11 @@ func TestStore_SQLite(t *testing.T) {
 	require.NoError(t, err)
 
 	runStoreSuite(t, sqlite.NewUserStore(conn), sqlite.NewRoleStore(conn))
+<<<<<<< HEAD
 	runGroupStoreSuite(t, sqlite.NewGroupStore(conn), sqlite.NewUserStore(conn), sqlite.NewRoleStore(conn))
 	runProjectStoreSuite(t, sqlite.NewProjectStore(conn), sqlite.NewGroupStore(conn))
+=======
+>>>>>>> origin/master
 }
 
 func TestStore_Postgres(t *testing.T) {
@@ -148,8 +151,11 @@ func TestStore_Postgres(t *testing.T) {
 	require.NoError(t, err)
 
 	runStoreSuite(t, pg.NewUserStore(conn), pg.NewRoleStore(conn))
+<<<<<<< HEAD
 	runGroupStoreSuite(t, pg.NewGroupStore(conn), pg.NewUserStore(conn), pg.NewRoleStore(conn))
 	runProjectStoreSuite(t, pg.NewProjectStore(conn), pg.NewGroupStore(conn))
+=======
+>>>>>>> origin/master
 }
 
 func TestStore_MySQL(t *testing.T) {
@@ -176,8 +182,11 @@ func TestStore_MySQL(t *testing.T) {
 	require.NoError(t, err)
 
 	runStoreSuite(t, mysql.NewUserStore(conn), mysql.NewRoleStore(conn))
+<<<<<<< HEAD
 	runGroupStoreSuite(t, mysql.NewGroupStore(conn), mysql.NewUserStore(conn), mysql.NewRoleStore(conn))
 	runProjectStoreSuite(t, mysql.NewProjectStore(conn), mysql.NewGroupStore(conn))
+=======
+>>>>>>> origin/master
 }
 
 func TestStore_MSSQL(t *testing.T) {
@@ -202,6 +211,7 @@ func TestStore_MSSQL(t *testing.T) {
 	require.NoError(t, err)
 
 	runStoreSuite(t, mssql.NewUserStore(conn), mssql.NewRoleStore(conn))
+<<<<<<< HEAD
 	runGroupStoreSuite(t, mssql.NewGroupStore(conn), mssql.NewUserStore(conn), mssql.NewRoleStore(conn))
 	runProjectStoreSuite(t, mssql.NewProjectStore(conn), mssql.NewGroupStore(conn))
 }
@@ -420,4 +430,6 @@ func runProjectStoreSuite(t *testing.T, projectStore stores.ProjectStore, groupS
 	p4, err := projectStore.Get(ctx, project.ID)
 	require.NoError(t, err)
 	require.Nil(t, p4)
+=======
+>>>>>>> origin/master
 }
