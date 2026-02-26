@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS ssh_keys;
+DROP TABLE IF EXISTS ssh_key_names;
+DROP TABLE IF EXISTS certificates;
+DROP TABLE IF EXISTS certificate_names;
+DROP TABLE IF EXISTS secrets;
+DROP TABLE IF EXISTS secret_names;
+DROP TABLE IF EXISTS env_variables;
+DROP TABLE IF EXISTS env_variable_names;
+DROP TABLE IF EXISTS config_files;
+DROP TABLE IF EXISTS config_file_names;
+DROP TABLE IF EXISTS environments;

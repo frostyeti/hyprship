@@ -15,6 +15,9 @@ type StoreFactory struct {
 	RoleStore                RoleStore
 	GroupStore               GroupStore
 	ProjectStore             ProjectStore
+	EnvironmentStore         EnvironmentStore
+	ConfigStore              ConfigStore
+	SecretStore              SecretStore
 	UserPasswordAuthStore    UserPasswordAuthStore
 	UserSessionStore         UserSessionStore
 	UserPasswordHistoryStore UserPasswordHistoryStore
@@ -33,6 +36,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			RoleStore:                sqlite.NewRoleStore(db),
 			GroupStore:               sqlite.NewGroupStore(db),
 			ProjectStore:             sqlite.NewProjectStore(db),
+			EnvironmentStore:         sqlite.NewEnvironmentStore(db),
+			ConfigStore:              sqlite.NewConfigStore(db),
+			SecretStore:              sqlite.NewSecretStore(db),
 			UserPasswordAuthStore:    sqlite.NewUserPasswordAuthStore(db),
 			UserSessionStore:         sqlite.NewUserSessionStore(db),
 			UserPasswordHistoryStore: sqlite.NewUserPasswordHistoryStore(db),
@@ -48,6 +54,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			RoleStore:                pg.NewRoleStore(db),
 			GroupStore:               pg.NewGroupStore(db),
 			ProjectStore:             pg.NewProjectStore(db),
+			EnvironmentStore:         pg.NewEnvironmentStore(db),
+			ConfigStore:              pg.NewConfigStore(db),
+			SecretStore:              pg.NewSecretStore(db),
 			UserPasswordAuthStore:    pg.NewUserPasswordAuthStore(db),
 			UserSessionStore:         pg.NewUserSessionStore(db),
 			UserPasswordHistoryStore: pg.NewUserPasswordHistoryStore(db),
@@ -63,6 +72,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			RoleStore:                mysql.NewRoleStore(db),
 			GroupStore:               mysql.NewGroupStore(db),
 			ProjectStore:             mysql.NewProjectStore(db),
+			EnvironmentStore:         mysql.NewEnvironmentStore(db),
+			ConfigStore:              mysql.NewConfigStore(db),
+			SecretStore:              mysql.NewSecretStore(db),
 			UserPasswordAuthStore:    mysql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mysql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mysql.NewUserPasswordHistoryStore(db),
@@ -78,6 +90,9 @@ func NewStoreFactory(driver string, db *sql.DB) (*StoreFactory, error) {
 			RoleStore:                mssql.NewRoleStore(db),
 			GroupStore:               mssql.NewGroupStore(db),
 			ProjectStore:             mssql.NewProjectStore(db),
+			EnvironmentStore:         mssql.NewEnvironmentStore(db),
+			ConfigStore:              mssql.NewConfigStore(db),
+			SecretStore:              mssql.NewSecretStore(db),
 			UserPasswordAuthStore:    mssql.NewUserPasswordAuthStore(db),
 			UserSessionStore:         mssql.NewUserSessionStore(db),
 			UserPasswordHistoryStore: mssql.NewUserPasswordHistoryStore(db),

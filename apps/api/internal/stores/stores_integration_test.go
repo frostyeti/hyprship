@@ -119,6 +119,7 @@ func TestStore_SQLite(t *testing.T) {
 	runStoreSuite(t, sqlite.NewUserStore(conn), sqlite.NewRoleStore(conn))
 	runGroupStoreSuite(t, sqlite.NewGroupStore(conn), sqlite.NewUserStore(conn), sqlite.NewRoleStore(conn))
 	runProjectStoreSuite(t, sqlite.NewProjectStore(conn), sqlite.NewGroupStore(conn))
+	runEnvironmentStoreSuite(t, sqlite.NewEnvironmentStore(conn), sqlite.NewConfigStore(conn), sqlite.NewSecretStore(conn), sqlite.NewProjectStore(conn))
 }
 
 func TestStore_Postgres(t *testing.T) {
@@ -150,6 +151,7 @@ func TestStore_Postgres(t *testing.T) {
 	runStoreSuite(t, pg.NewUserStore(conn), pg.NewRoleStore(conn))
 	runGroupStoreSuite(t, pg.NewGroupStore(conn), pg.NewUserStore(conn), pg.NewRoleStore(conn))
 	runProjectStoreSuite(t, pg.NewProjectStore(conn), pg.NewGroupStore(conn))
+	runEnvironmentStoreSuite(t, pg.NewEnvironmentStore(conn), pg.NewConfigStore(conn), pg.NewSecretStore(conn), pg.NewProjectStore(conn))
 }
 
 func TestStore_MySQL(t *testing.T) {
@@ -178,6 +180,7 @@ func TestStore_MySQL(t *testing.T) {
 	runStoreSuite(t, mysql.NewUserStore(conn), mysql.NewRoleStore(conn))
 	runGroupStoreSuite(t, mysql.NewGroupStore(conn), mysql.NewUserStore(conn), mysql.NewRoleStore(conn))
 	runProjectStoreSuite(t, mysql.NewProjectStore(conn), mysql.NewGroupStore(conn))
+	runEnvironmentStoreSuite(t, mysql.NewEnvironmentStore(conn), mysql.NewConfigStore(conn), mysql.NewSecretStore(conn), mysql.NewProjectStore(conn))
 }
 
 func TestStore_MSSQL(t *testing.T) {
@@ -204,6 +207,7 @@ func TestStore_MSSQL(t *testing.T) {
 	runStoreSuite(t, mssql.NewUserStore(conn), mssql.NewRoleStore(conn))
 	runGroupStoreSuite(t, mssql.NewGroupStore(conn), mssql.NewUserStore(conn), mssql.NewRoleStore(conn))
 	runProjectStoreSuite(t, mssql.NewProjectStore(conn), mssql.NewGroupStore(conn))
+	runEnvironmentStoreSuite(t, mssql.NewEnvironmentStore(conn), mssql.NewConfigStore(conn), mssql.NewSecretStore(conn), mssql.NewProjectStore(conn))
 }
 
 func runGroupStoreSuite(t *testing.T, groupStore stores.GroupStore, userStore stores.UserStore, roleStore stores.RoleStore) {
@@ -420,4 +424,149 @@ func runProjectStoreSuite(t *testing.T, projectStore stores.ProjectStore, groupS
 	p4, err := projectStore.Get(ctx, project.ID)
 	require.NoError(t, err)
 	require.Nil(t, p4)
+}
+func runEnvironmentStoreSuite(t *testing.T, envStore stores.EnvironmentStore, cfgStore stores.ConfigStore, secStore stores.SecretStore, projStore stores.ProjectStore) {
+	ctx := context.Background()
+
+	// Create test project
+	projID := uuid.New()
+	err := projStore.Create(ctx, &models.Project{
+		ID:        projID,
+		Name:      "Env Test Project",
+		Slug:      "env-test-proj",
+		IsActive:  true,
+		CreatedAt: time.Now().Truncate(time.Second),
+	})
+	require.NoError(t, err)
+
+	// 1. Environments
+	env1 := &models.Environment{
+		ID:        uuid.New(),
+		ProjectID: projID,
+		Name:      "Development",
+		CreatedAt: time.Now().Truncate(time.Second),
+	}
+	err = envStore.Create(ctx, env1)
+	require.NoError(t, err)
+
+	env2 := &models.Environment{
+		ID:        uuid.New(),
+		ProjectID: projID,
+		Name:      "Production",
+		CreatedAt: time.Now().Truncate(time.Second),
+	}
+	err = envStore.Create(ctx, env2)
+	require.NoError(t, err)
+
+	// Get
+	e, err := envStore.Get(ctx, env1.ID)
+	require.NoError(t, err)
+	require.NotNil(t, e)
+	assert.Equal(t, "Development", e.Name)
+
+	e2, err := envStore.GetByName(ctx, projID, "production")
+	require.NoError(t, err)
+	require.NotNil(t, e2)
+	assert.Equal(t, env2.ID, e2.ID)
+
+	// List
+	res, err := envStore.List(ctx, projID, core.ListOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, 2, res.TotalCount)
+	assert.Len(t, res.Items, 2)
+
+	// Update
+	desc := "Dev Env"
+	env1.Description = &desc
+	err = envStore.Update(ctx, env1)
+	require.NoError(t, err)
+	e, err = envStore.Get(ctx, env1.ID)
+	require.NoError(t, err)
+	assert.Equal(t, "Dev Env", *e.Description)
+
+	// 2. Config Files
+	cfgName := &models.ConfigFileName{
+		ID:        uuid.New(),
+		ProjectID: projID,
+		Name:      "app.json",
+		CreatedAt: time.Now().Truncate(time.Second),
+	}
+	err = cfgStore.CreateConfigFileName(ctx, cfgName)
+	require.NoError(t, err)
+
+	cfgNames, err := cfgStore.ListConfigFileNames(ctx, projID, core.ListOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, 1, cfgNames.TotalCount)
+
+	cfgFile := &models.ConfigFile{
+		ID:               uuid.New(),
+		ConfigFileNameID: cfgName.ID,
+		EnvironmentID:    env1.ID,
+		Content:          `{"debug":true}`,
+		CreatedAt:        time.Now().Truncate(time.Second),
+	}
+	err = cfgStore.UpsertConfigFile(ctx, cfgFile)
+	require.NoError(t, err)
+
+	cf, err := cfgStore.GetConfigFile(ctx, cfgName.ID, env1.ID)
+	require.NoError(t, err)
+	require.NotNil(t, cf)
+	assert.Equal(t, `{"debug":true}`, cf.Content)
+
+	// 3. Env Variables
+	varName := &models.EnvVariableName{
+		ID:        uuid.New(),
+		ProjectID: projID,
+		Name:      "LOG_LEVEL",
+		CreatedAt: time.Now().Truncate(time.Second),
+	}
+	err = cfgStore.CreateEnvVariableName(ctx, varName)
+	require.NoError(t, err)
+
+	envVar := &models.EnvVariable{
+		ID:                uuid.New(),
+		EnvVariableNameID: varName.ID,
+		EnvironmentID:     env1.ID,
+		Value:             "debug",
+		CreatedAt:         time.Now().Truncate(time.Second),
+	}
+	err = cfgStore.UpsertEnvVariable(ctx, envVar)
+	require.NoError(t, err)
+
+	v, err := cfgStore.GetEnvVariable(ctx, varName.ID, env1.ID)
+	require.NoError(t, err)
+	require.NotNil(t, v)
+	assert.Equal(t, "debug", v.Value)
+
+	// 4. Secrets
+	secName := &models.SecretName{
+		ID:        uuid.New(),
+		ProjectID: projID,
+		Name:      "DB_PASS",
+		CreatedAt: time.Now().Truncate(time.Second),
+	}
+	err = secStore.CreateSecretName(ctx, secName)
+	require.NoError(t, err)
+
+	sec := &models.Secret{
+		ID:            uuid.New(),
+		SecretNameID:  secName.ID,
+		EnvironmentID: env1.ID,
+		Value:         "supersecret",
+		CreatedAt:     time.Now().Truncate(time.Second),
+	}
+	err = secStore.UpsertSecret(ctx, sec)
+	require.NoError(t, err)
+
+	s, err := secStore.GetSecret(ctx, secName.ID, env1.ID)
+	require.NoError(t, err)
+	require.NotNil(t, s)
+	assert.Equal(t, "supersecret", s.Value)
+
+	// Delete
+	err = envStore.Delete(ctx, env2.ID)
+	require.NoError(t, err)
+	e2, err = envStore.Get(ctx, env2.ID)
+	require.NoError(t, err)
+	require.Nil(t, e2)
 }
