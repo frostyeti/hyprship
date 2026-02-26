@@ -2,15 +2,10 @@ package middleware
 
 import (
 	"net/http"
-<<<<<<< HEAD
 	"strings"
 
 	"github.com/frostyeti/hyprship/apps/api/internal/routes"
 	"github.com/frostyeti/hyprship/apps/api/internal/stores"
-=======
-
-	"github.com/frostyeti/hyprship/apps/api/internal/routes"
->>>>>>> origin/master
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -18,12 +13,9 @@ import (
 const (
 	UserIDKey    = "userID"
 	SessionIDKey = "sessionID"
-<<<<<<< HEAD
 	RolesKey     = "roles"
 	GroupsKey    = "groups"
 	ClaimsKey    = "claims"
-=======
->>>>>>> origin/master
 )
 
 // RequireAuth is a placeholder middleware that ensures a user is authenticated.
@@ -64,7 +56,6 @@ func RequireAuth() gin.HandlerFunc {
 	}
 }
 
-<<<<<<< HEAD
 // ClaimsMiddleware injects the authenticated user's groups, roles, and claims into the context.
 func ClaimsMiddleware(userStore stores.UserStore, groupStore stores.GroupStore, roleStore stores.RoleStore) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -172,12 +163,6 @@ func RequireClaim(claimType, claimValue string) gin.HandlerFunc {
 			return
 		}
 
-=======
-// RequireClaim checks if the authenticated user has a specific claim/permission.
-func RequireClaim(claimType, claimValue string) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// TODO: Validate user claims from JWT or database
->>>>>>> origin/master
 		c.Next()
 	}
 }

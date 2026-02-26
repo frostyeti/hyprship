@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/frostyeti/hyprship/apps/api/internal/core"
+	"github.com/frostyeti/hyprship/apps/api/internal/middleware"
 	"github.com/frostyeti/hyprship/apps/api/internal/models"
 	"github.com/frostyeti/hyprship/apps/api/internal/routes"
 	"github.com/frostyeti/hyprship/apps/api/internal/stores"
@@ -24,10 +25,13 @@ func RegisterProjectRoutes(r *gin.RouterGroup, store stores.ProjectStore) {
 	r.PUT("/:id", h.UpdateProject)
 	r.DELETE("/:id", h.DeleteProject)
 
-	r.GET("/:id/groups", h.ListProjectGroups)
-	r.POST("/:id/groups/:groupId", h.AddProjectGroup)
-	r.PUT("/:id/groups/:groupId", h.UpdateProjectGroup)
-	r.DELETE("/:id/groups/:groupId", h.RemoveProjectGroup)
+	projectSubGroup := r.Group("/:id")
+	projectSubGroup.Use(middleware.ProjectPermissionsMiddleware(store, "id"))
+
+	projectSubGroup.GET("/groups", h.ListProjectGroups)
+	projectSubGroup.POST("/groups/:groupId", h.AddProjectGroup)
+	projectSubGroup.PUT("/groups/:groupId", h.UpdateProjectGroup)
+	projectSubGroup.DELETE("/groups/:groupId", h.RemoveProjectGroup)
 }
 
 func (h *ProjectHandler) ListProjects(c *gin.Context) {

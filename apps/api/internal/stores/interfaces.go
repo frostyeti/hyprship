@@ -59,7 +59,6 @@ type RoleStore interface {
 	AddClaim(ctx context.Context, claim *models.RoleClaim) error
 	RemoveClaim(ctx context.Context, claimID int32) error
 }
-<<<<<<< HEAD
 
 type GroupStore interface {
 	List(ctx context.Context, opts core.ListOptions) (core.ListResult[models.Group], error)
@@ -96,5 +95,3 @@ type ProjectStore interface {
 	UpdateGroupPermissions(ctx context.Context, projectID, groupID uuid.UUID, permissions int64) error
 	ListGroups(ctx context.Context, projectID uuid.UUID) ([]models.ProjectGroup, error)
 }
-=======
->>>>>>> origin/master
