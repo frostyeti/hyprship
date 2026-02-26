@@ -13,11 +13,14 @@ import (
 )
 
 type ProjectHandler struct {
-	store stores.ProjectStore
+	store    stores.ProjectStore
+	envStore stores.EnvironmentStore
+	cfgStore stores.ConfigStore
+	secStore stores.SecretStore
 }
 
-func RegisterProjectRoutes(r *gin.RouterGroup, store stores.ProjectStore) {
-	h := &ProjectHandler{store: store}
+func RegisterProjectRoutes(r *gin.RouterGroup, store stores.ProjectStore, envStore stores.EnvironmentStore, cfgStore stores.ConfigStore, secStore stores.SecretStore) {
+	h := &ProjectHandler{store: store, envStore: envStore, cfgStore: cfgStore, secStore: secStore}
 
 	r.GET("", h.ListProjects)
 	r.GET("/:id", h.GetProject)
@@ -32,6 +35,17 @@ func RegisterProjectRoutes(r *gin.RouterGroup, store stores.ProjectStore) {
 	projectSubGroup.POST("/groups/:groupId", h.AddProjectGroup)
 	projectSubGroup.PUT("/groups/:groupId", h.UpdateProjectGroup)
 	projectSubGroup.DELETE("/groups/:groupId", h.RemoveProjectGroup)
+
+	// Environments
+	envGroup := projectSubGroup.Group("/environments")
+	RegisterEnvironmentRoutes(envGroup, envStore)
+
+	// Configs
+	envSubGroup := envGroup.Group("/:envId")
+	RegisterConfigRoutes(projectSubGroup, envSubGroup, cfgStore)
+
+	// Secrets
+	RegisterSecretRoutes(projectSubGroup, envSubGroup, secStore)
 }
 
 func (h *ProjectHandler) ListProjects(c *gin.Context) {

@@ -115,7 +115,7 @@ func TestListProjects(t *testing.T) {
 	}
 
 	r := gin.Default()
-	RegisterProjectRoutes(r.Group("/projects"), mockStore)
+	RegisterProjectRoutes(r.Group("/projects"), mockStore, nil, nil, nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/projects", nil)
@@ -142,7 +142,7 @@ func TestGetProject(t *testing.T) {
 	}
 
 	r := gin.Default()
-	RegisterProjectRoutes(r.Group("/projects"), mockStore)
+	RegisterProjectRoutes(r.Group("/projects"), mockStore, nil, nil, nil)
 
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("GET", "/projects/"+projID.String(), nil)
@@ -168,7 +168,7 @@ func TestCreateProject(t *testing.T) {
 	}
 
 	r := gin.Default()
-	RegisterProjectRoutes(r.Group("/projects"), mockStore)
+	RegisterProjectRoutes(r.Group("/projects"), mockStore, nil, nil, nil)
 
 	reqBody := CreateProjectRequest{
 		Name:     "New Project",

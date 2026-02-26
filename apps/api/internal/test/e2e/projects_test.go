@@ -118,7 +118,7 @@ func TestE2E_Projects_CRUD(t *testing.T) {
 	}
 
 	// We pass only the mock project store
-	v1.RegisterRoutes(apiV1, nil, nil, nil, nil, mockStore, nil, nil, nil, nil, nil, nil)
+	v1.RegisterRoutes(apiV1, nil, nil, nil, nil, mockStore, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 
 	// 1. Create a project
 	reqBody := v1.CreateProjectRequest{

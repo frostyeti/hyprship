@@ -19,7 +19,7 @@ func setupTestServer() *gin.Engine {
 	gin.SetMode(gin.TestMode)
 	r := gin.Default()
 	apiV1 := r.Group("/api/v1")
-	v1.RegisterRoutes(apiV1, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
+	v1.RegisterRoutes(apiV1, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	return r
 }
 

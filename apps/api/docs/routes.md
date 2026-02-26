@@ -45,3 +45,41 @@
 - `POST /{id}/groups/{groupId}` - Add a group to a project with permissions.
 - `PUT /{id}/groups/{groupId}` - Update a group's permissions in a project.
 - `DELETE /{id}/groups/{groupId}` - Remove a group from a project.
+
+### Project Environments (`/api/v1/projects/{id}/environments`)
+- `GET /` - List environments for a project.
+- `GET /{envId}` - Get an environment by ID or name.
+- `POST /` - Create a new environment.
+- `PUT /{envId}` - Update an environment by ID.
+- `DELETE /{envId}` - Delete an environment by ID.
+
+### Project Configuration Names (`/api/v1/projects/{id}/config-files` & `/env-variables`)
+- `GET /config-files` - List configuration file names for a project.
+- `POST /config-files` - Create a new configuration file name.
+- `DELETE /config-files/{nameId}` - Delete a configuration file name.
+- `GET /env-variables` - List environment variable names for a project.
+- `POST /env-variables` - Create a new environment variable name.
+- `DELETE /env-variables/{nameId}` - Delete an environment variable name.
+
+### Project Secrets Names (`/api/v1/projects/{id}/secrets` & `/certificates` & `/ssh-keys`)
+- `GET /secrets` - List secret names for a project.
+- `POST /secrets` - Create a new secret name.
+- `DELETE /secrets/{nameId}` - Delete a secret name.
+- `GET /certificates` - List certificate names for a project.
+- `POST /certificates` - Create a new certificate name.
+- `DELETE /certificates/{nameId}` - Delete a certificate name.
+- `GET /ssh-keys` - List SSH key names for a project.
+- `POST /ssh-keys` - Create a new SSH key name.
+- `DELETE /ssh-keys/{nameId}` - Delete an SSH key name.
+
+### Environment Specific Values (`/api/v1/projects/{id}/environments/{envId}`)
+- `GET /config-files/{nameId}` - Get the contents of a configuration file for this environment.
+- `PUT /config-files/{nameId}` - Create or update a configuration file for this environment.
+- `GET /env-variables/{nameId}` - Get the value of an environment variable.
+- `PUT /env-variables/{nameId}` - Create or update an environment variable.
+- `GET /secrets/{nameId}` - Get a secret value.
+- `PUT /secrets/{nameId}` - Create or update a secret value.
+- `GET /certificates/{nameId}` - Get a certificate.
+- `PUT /certificates/{nameId}` - Create or update a certificate.
+- `GET /ssh-keys/{nameId}` - Get an SSH key.
+- `PUT /ssh-keys/{nameId}` - Create or update an SSH key.
