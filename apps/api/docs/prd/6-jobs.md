@@ -86,15 +86,15 @@ only needed if the job is meant to run a script on a device.  this allows us to 
 
 by default this will be yaml and we'll provide our own workflow engine, but we also allow other engine types and talk to that engine.
 
-
-
 ## Table Design Recommendations
+
 * **Auditing:** Include standard auditing fields (`created_at`, `updated_at`, `deleted_at`).
 * **Run History Table:** Add a `job_runs` table containing `id`, `job_id`, `status` (`pending`, `running`, `success`, `failed`), `started_at`, `finished_at`, `output_log` (or pointer to log storage), and `error_message`.
 * **UUIDs:** `script_id` and `workflow_id` should correctly map to `uuid` and be indexed for fast relational queries.
 * **Content:** Consider `workflows.content` as `jsonb` or `json` if structured internally, or `text` if fully parsing external YAML definitions.
 
 ## Proposed API Routes
+
 * `GET /api/v1/jobs`
 * `GET /api/v1/jobs/{id}`
 * `POST /api/v1/jobs`
@@ -109,6 +109,7 @@ by default this will be yaml and we'll provide our own workflow engine, but we a
 * `GET /api/v1/workflows/{id}`
 
 ## Functionality Beyond CRUD
+
 * **Ad-hoc Execution:** Allow triggering any active job out of schedule via `/api/v1/jobs/{id}/run`.
 * **Real-time Log Streaming:** Output stdout/stderr of executing scripts or workflow steps back to the UI via Server-Sent Events (SSE) or WebSockets (`/ws/v1/jobs/{id}/runs/{run_id}/logs`).
 * **Webhook Triggers:** Generate unique URLs for triggering jobs remotely from an external system.

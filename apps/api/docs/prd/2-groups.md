@@ -45,10 +45,12 @@ The group may be associated with a distro list hosted somewhere else.
 useful for applying roles to a group of users for claims.
 
 ## Table Design Recommendations
+
 * **Auditing:** Add standard auditing fields to `groups` (`created_at`, `updated_at`, `deleted_at`).
 * **Keys:** The `groups.key` column is marked `uniq` and limited to 32 chars. Consider adding a DB-level regular expression constraint or check to enforce the starting alpha requirement and prevent trailing hyphens.
 
 ## Proposed API Routes
+
 * `GET /api/v1/groups` (Supports filtering, sorting, paging)
 * `GET /api/v1/groups/{id}`
 * `POST /api/v1/groups`
@@ -62,5 +64,6 @@ useful for applying roles to a group of users for claims.
 * `DELETE /api/v1/groups/{id}/roles/{role_id}`
 
 ## Functionality Beyond CRUD
+
 * **Bulk User Assignment:** Accept lists of UUIDs or Emails to add/remove users from a group in batch.
 * **Distro Integration Sync:** Support webhooks or periodic syncs to update external distro lists based on group membership changes.

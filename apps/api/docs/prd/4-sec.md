@@ -175,13 +175,16 @@ or resource that requires it.
 | updated_at      | datetime  | nil        |
 
 password and private key are encrypted if they have values. is_primary is used to notate the primary certificate for a certificate name. this allows us to have multiple certificates for a certificate name and track history.
+
 ## Table Design Recommendations
+
 * **Primary Key Consistency:** Consider standardizing all primary keys to `uuid` to prevent sequence guessing and facilitate easier cross-table joins/references. `environment`, `config_files`, `env_variables`, `secret_names`, `certificate_names`, and `ssh_key_names` are currently integers.
 * **Sensitive Names:** Columns that store encrypted text (e.g. `secrets.value`, `device_ssh_auth.password`, `certificates.private_key`) should probably be appended with `_encrypted` to follow the `_digest` hashing convention mentioned in the project instructions.
 * **Auditing/Tracking:** Add `created_by`, `updated_by` to history tables so that changes to configuration/secrets can be tracked securely to the exact user/process that triggered it.
 * **Soft Deletes:** Ensure soft-deletion of `config_files`, `env_variables`, `secrets`, etc.
 
 ## Proposed API Routes
+
 * `GET /api/v1/environments`
 * `GET /api/v1/projects/{id}/config-files`
 * `POST /api/v1/projects/{id}/config-files`
@@ -194,6 +197,7 @@ password and private key are encrypted if they have values. is_primary is used t
 * `POST /api/v1/ssh-keys/generate`
 
 ## Functionality Beyond CRUD
+
 * **Bulk Imports/Exports:** Accept JSON, CSV, Excel, YAML via a bulk import/export process (especially utilizing ZIP archives when dealing with multiple configuration files).
 * **On-the-fly Decryption Engine:** Provide headers (`Accept-Encoding: base64/plaintext`) or query parameters allowing clients to dictate whether the payload should be decrypted into memory or returned as base64-encoded bytes.
 * **Template Rendering:** Create a render endpoint (`POST /api/v1/config-files/{id}/render`) that accepts context variables and outputs the rendered text via a Go text/template engine.
